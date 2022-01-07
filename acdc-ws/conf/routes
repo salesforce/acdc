@@ -1,0 +1,3 @@
+GET     /__status                   controllers.StatusController.status()
+
+->      /api/v1                     routers.ApiRouter
