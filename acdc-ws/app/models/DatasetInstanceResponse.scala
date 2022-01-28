@@ -14,6 +14,7 @@ import play.api.libs.json.Json
 case class DatasetInstanceResponse(
   name: String,
   location: String,
+  dataset: Option[String],
   createdAt: LocalDateTime
 )
 
