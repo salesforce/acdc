@@ -29,7 +29,7 @@ class DatasetInstanceTable(tag: Tag)
 
   def createdAt = column[LocalDateTime]("created_at")
 
-  override def * = (name, location, createdAt).mapTo[DatasetInstanceTable.R]
+  override def * = (name, location, dataset, createdAt).mapTo[DatasetInstanceTable.R]
 
 }
 
@@ -37,6 +37,6 @@ object DatasetInstanceTable {
 
   def apply() = TableQuery[DatasetInstanceTable]
 
-  case class R(name: String, location: String, createdAt: LocalDateTime)
+  case class R(name: String, location: String, dataset: Option[String], createdAt: LocalDateTime)
 
 }

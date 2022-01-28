@@ -35,7 +35,7 @@ object DatasetInstanceQuery {
     def delete() = table.delete
 
     def insert(location: String) =
-      DatasetInstanceTable() += DatasetInstanceTable.R(name, location, LocalDateTime.now())
+      DatasetInstanceTable() += DatasetInstanceTable.R(name, location, None, LocalDateTime.now())
 
     def create(location: String)(implicit ec: ExecutionContext) = (
       for {
