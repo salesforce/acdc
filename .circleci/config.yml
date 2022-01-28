@@ -78,3 +78,6 @@ workflows:
           filters:
             branches:
               only: master
+  build_only:
+    jobs:
+      - build
