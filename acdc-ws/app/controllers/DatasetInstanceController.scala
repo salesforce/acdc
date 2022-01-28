@@ -39,7 +39,8 @@ class DatasetInstanceController @Inject() (cc: ControllerComponents, dbService: 
 
   def get(name: String) = Action.async {
     db.async(DatasetInstanceQuery.ForName(name).get()).map {
-      case Some(r) => Ok(Json.toJson(DatasetInstanceResponse(r.name, r.location, r.createdAt)))
+      case Some(r) =>
+        Ok(Json.toJson(DatasetInstanceResponse(r.name, r.location, r.dataset, r.createdAt)))
       case None => NotFound
     }
   }
@@ -53,7 +54,8 @@ class DatasetInstanceController @Inject() (cc: ControllerComponents, dbService: 
   }
 
   def removeFrom(instName: String, datasetName: String) = Action.async {
-    db.async(DatasetInstanceQuery.ForName(instName).removeFrom(datasetName)).map(r => Ok(Json.toJson(r)))
+    db.async(DatasetInstanceQuery.ForName(instName).removeFrom(datasetName))
+      .map(r => Ok(Json.toJson(r)))
   }
 
 }
