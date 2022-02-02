@@ -17,29 +17,47 @@ import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetLineageQuery
 import services.DatabaseService
+import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton
-class DatasetLineageController @Inject() (cc: ControllerComponents, dbService: DatabaseService)(
-  implicit ec: ExecutionContext
+class DatasetLineageController @Inject() (
+  cc: ControllerComponents,
+  dbService: DatabaseService,
+  authAction: AuthTransformAction
+)(implicit
+  ec: ExecutionContext
 ) extends AcdcAbstractController(cc, dbService) {
 
-  def setSources(dest: String) = Action.async(parse.json) {
-    _.body
-      .validate[Seq[String]]
-      .fold(
-        e => Future.successful(BadRequest(JsError.toJson(e))),
-        rs =>
-          db.async(DatasetLineageQuery.ForDestination(dest).setSources(rs))
-            .map(r => Created(Json.toJson(r.getOrElse(0))))
-      )
+  def setSources(dest: String) = authAction.async(parse.json) { request =>
+    request match {
+      case ValidApiRequest(apiRole, req) =>
+        req.body
+          .validate[Seq[String]]
+          .fold(
+            e => Future.successful(BadRequest(JsError.toJson(e))),
+            rs =>
+              db.async(DatasetLineageQuery.ForDestination(dest).setSources(rs))
+                .map(r => Created(Json.toJson(r.getOrElse(0))))
+          )
+      case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    }
   }
 
-  def getSources(dest: String) = Action.async {
-    db.async(DatasetLineageQuery.ForDestination(dest).getSources()).map(rs => Ok(Json.toJson(rs)))
+  def getSources(dest: String) = authAction.async { request =>
+    request match {
+      case ValidApiRequest(apiRole, _) =>
+        db.async(DatasetLineageQuery.ForDestination(dest).getSources())
+          .map(rs => Ok(Json.toJson(rs)))
+      case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    }
   }
 
-  def delete(dest: String) = Action.async {
-    db.async(DatasetLineageQuery.ForDestination(dest).delete()).map(r => Ok(Json.toJson(r)))
+  def delete(dest: String) = authAction.async { request =>
+    request match {
+      case ValidApiRequest(apiRole, _) =>
+        db.async(DatasetLineageQuery.ForDestination(dest).delete()).map(r => Ok(Json.toJson(r)))
+      case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    }
   }
 
 }
