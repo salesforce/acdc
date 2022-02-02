@@ -18,6 +18,7 @@ how to deploy the service.
 To setup the database run `com.salesforce.mce.acdc.tool.ProvisionDatabase`.
 
 ```shell 
+export POSTGRES_PASSWORD=<my db password>
 sbt 'project core; run ProvisionDatabase'
 ```
 
