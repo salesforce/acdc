@@ -17,12 +17,12 @@ how to deploy the service.
 
 To setup the database run `com.salesforce.mce.acdc.tool.ProvisionDatabase`.
 
-```shell 
+```shell
 export POSTGRES_PASSWORD=<my db password>
 sbt 'project core; run ProvisionDatabase'
 ```
 
-If config ```acdc.auth.enabled = true``` is enabled, authorization api-keys are SHA-256 hashed.  The REST enb-points should include a http header key ```x-api-key``` with appropriate value.  
+If config ```acdc.auth.enabled = true``` is enabled, authorization api-keys are SHA-256 hashed.  The REST enb-points should include a http header key ```x-api-key``` with appropriate value.
 
 Set an environment variable for the authorized x-api-key hashed string.  Example:
 
@@ -32,10 +32,10 @@ export MCE_ENV_X_API_ADMIN2=70ad8c1543728a3e61bbec26d1df5bd742d1c2f464f2ac54a2fe
 
 ```
 
-For keys rotation, 2 keys can cycle through still older copies of hashed strings.  
+For keys rotation, 2 keys can cycle through still older copies of hashed strings.
 
-## Run web service 
+## Run web service
 
-```shell 
+```shell
 sbt ws/run
 ```

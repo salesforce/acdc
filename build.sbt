@@ -4,12 +4,11 @@ val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
-  scalaVersion := "2.13.6",
+  scalaVersion := "2.13.8",
   libraryDependencies += scalaTestArtifact,
   fork := true,
   organization := "com.salesforce.mce",
   assembly / test := {},  // skip test during assembly
-  maintainer := "kexin.xie@salesforce.com",
   headerLicense := Some(HeaderLicense.Custom(
   """|Copyright (c) 2021, salesforce.com, inc.
      |All rights reserved.
@@ -36,7 +35,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.2.+",
+      "org.postgresql" % "postgresql" % "42.3.+",
     )
   )
 
