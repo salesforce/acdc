@@ -2,6 +2,8 @@
 
 > A Coarse-grained Data Catalog
 
+[![CircleCI](https://circleci.com/gh/salesforce/acdc.svg?style=svg)](https://circleci.com/gh/salesforce/acdc)
+
 ## Features
 
 A play framework based CRUD service that helps keeping track of dataset's
