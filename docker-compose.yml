@@ -2,14 +2,11 @@ version: "3.8"
 
 services:
   ws:
-    image: scala-sbt-dev
+    image: realstraw/sbt
     working_dir: /acdc/ws
     volumes:
       - ./:/acdc/ws
     environment:
-      DMP_ARTIFACTORY_HOST: "${DMP_ARTIFACTORY_HOST}"
-      DMP_ARTIFACTORY_USER: "${DMP_ARTIFACTORY_USER}"
-      DMP_ARTIFACTORY_PASSWORD: "${DMP_ARTIFACTORY_PASSWORD}"
       POSTGRES_PASSWORD: "acdc"
     ports:
       - 9001:9000
