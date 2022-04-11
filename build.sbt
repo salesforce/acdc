@@ -1,6 +1,7 @@
 val slickVersion = "3.3.3"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
+val rollbarArtifact = "com.rollbar" % "rollbar-logback" % "1.3.1"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
@@ -47,7 +48,8 @@ lazy val ws = (project in file("acdc-ws")).
     buildInfoKeys := Seq[BuildInfoKey](name, version),
     buildInfoPackage := "com.salesforce.mce.acdc.ws",
     libraryDependencies ++= Seq(
-      guice
+      guice,
+      rollbarArtifact
     )
   ).
   dependsOn(core)
