@@ -9,13 +9,10 @@ package controllers
 
 import javax.inject._
 
-import scala.concurrent.Future
-
 import play.api.libs.json._
 import play.api.mvc._
 
 import com.salesforce.mce.acdc.ws.BuildInfo
-import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton
 class StatusController @Inject() (cc: ControllerComponents)
