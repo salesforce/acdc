@@ -18,15 +18,11 @@ import com.salesforce.mce.acdc.ws.BuildInfo
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton
-class StatusController @Inject() (cc: ControllerComponents, authAction: AuthTransformAction)
+class StatusController @Inject() (cc: ControllerComponents)
     extends AbstractController(cc) {
 
-  def status() = authAction.async { request =>
-    request match {
-      case ValidApiRequest(apiRole, req) =>
-        Future.successful(Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version)))
-      case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
-    }
+  def status: Action[AnyContent] = Action { _ =>
+    Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
   }
 
 }
