@@ -18,6 +18,18 @@ services:
       - acdc-postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: "acdc"
+  flyway:
+    image: flyway/flyway:latest-alpine
+    volumes:
+      - ./flyway/sql:/flyway/sql
+    environment:
+      FLYWAY_URL: "jdbc:postgresql://db:5432/postgres"
+      FLYWAY_USER: "postgres"
+      FLYWAY_PASSWORD: "${POSTGRES_PASSWORD}"
+    depends_on:
+      - db
+    command:
+      migrate
 
 volumes:
   acdc-postgres-data:
