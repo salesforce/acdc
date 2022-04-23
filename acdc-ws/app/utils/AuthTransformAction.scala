@@ -11,17 +11,18 @@ class AuthTransformAction @Inject() (val parser: BodyParsers.Default)(implicit
   val executionContext: ExecutionContext
 ) extends ActionBuilder[ApiRequest, AnyContent] with ActionTransformer[Request, ApiRequest]
     with Logging {
-  def transform[A](request: Request[A]) =
+
+  override def transform[A](request: Request[A]) =
     Future.successful {
       Authorization.getRoles(request) match {
         case Nil =>
           logger.debug(s"transform not found x-api-key")
           InvalidApiRequest(request)
-        case x =>
-          logger.debug(s"transform found x-api-key $x")
-          if (x.contains(Authorization.Admin)) {
+        case xs =>
+          logger.debug(s"transform found x-api-key $xs")
+          if (xs.contains(Authorization.Admin)) {
             ValidApiRequest(Authorization.Admin, request)
-          } else if (x.contains(Authorization.User)) {
+          } else if (xs.contains(Authorization.User)) {
             ValidApiRequest(Authorization.User, request)
           } else {
             InvalidApiRequest(request)
