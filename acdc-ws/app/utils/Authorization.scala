@@ -7,11 +7,9 @@ import scala.util.Try
 
 import play.api.mvc.Request
 
-object Authorization {
-  final val Admin = "admin"
-  final val User = "user"
+class Authorization(authorizationSettings: AuthorizationSettings) {
 
-  lazy val authorizationSettings: AuthorizationSettings = AuthorizationSettings()
+  import Authorization._
 
   def getRoles(request: Request[_]): List[String] = {
     authorizationSettings.authEnabled match {
@@ -36,7 +34,14 @@ object Authorization {
   private def validateKey(key: String): Boolean =
     authorizationSettings.keyRoles.contains(convertToSha256(key))
 
-  private def convertToSha256(key: String): String =
+}
+
+object Authorization {
+
+  final val Admin = "admin"
+  final val User = "user"
+
+  def convertToSha256(key: String): String =
     Try(
       String.format(
         "%032x",
@@ -48,4 +53,5 @@ object Authorization {
         )
       )
     ).getOrElse(key)
+
 }
