@@ -7,17 +7,18 @@ services:
     volumes:
       - ./:/acdc/ws
     environment:
-      POSTGRES_PASSWORD: "acdc"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     ports:
       - 9001:9000
-    command:
-      sbt ws/run
+    tty: true # for easy debugging
+    # command:
+    #   sbt ws/run
   db:
     image: postgres
     volumes:
       - acdc-postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: "acdc"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
   flyway:
     image: flyway/flyway:latest-alpine
     volumes:

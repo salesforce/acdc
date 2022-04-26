@@ -3,6 +3,7 @@ package utils
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 import com.typesafe.config.{Config, ConfigFactory, ConfigList}
+import java.net.URL
 
 class AuthorizationSettings private (config: Config) {
 
@@ -31,6 +32,11 @@ object AuthorizationSettings {
     rootConfig.getConfig(configPath)
   )
 
-  def apply(): AuthorizationSettings = withRootConfig(ConfigFactory.load())
+  private def loadConfig(): Config = Option(System.getProperty("acdc.auth.config"))
+    .orElse(Option(System.getenv("ACDC_AUTH_CONFIG_URL")))
+    .map(url => ConfigFactory.load(ConfigFactory.parseURL(new URL(url))))
+    .getOrElse(ConfigFactory.load())
+
+  def apply(): AuthorizationSettings = withRootConfig(loadConfig())
 
 }
