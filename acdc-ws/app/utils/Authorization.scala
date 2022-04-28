@@ -1,13 +1,22 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+
 package utils
 
 import java.math.BigInteger
 import java.security.MessageDigest
 
 import scala.util.Try
+import scala.concurrent.duration._
 
 import play.api.mvc.Request
+import com.typesafe.config.ConfigFactory
 
-class Authorization(authorizationSettings: AuthorizationSettings) {
+class Authorization(private var authorizationSettings: AuthorizationSettings) {
 
   import Authorization._
 
@@ -31,8 +40,16 @@ class Authorization(authorizationSettings: AuthorizationSettings) {
       .map(validateKey)
       .getOrElse(!authorizationSettings.authEnabled)
 
+  def refreshDelay: Option[FiniteDuration] = authorizationSettings.ttl.map(_.second)
+
   private def validateKey(key: String): Boolean =
     authorizationSettings.keyRoles.contains(convertToSha256(key))
+
+  def reloadSettings(): this.type = {
+    ConfigFactory.invalidateCaches()
+    authorizationSettings = AuthorizationSettings()
+    this
+  }
 
 }
 
