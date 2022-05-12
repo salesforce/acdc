@@ -12,7 +12,7 @@ import javax.inject._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-import play.api.libs.json.{JsError, Json}
+import play.api.libs.json.{JsError, Json, JsNull}
 import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetLineageQuery
@@ -38,20 +38,20 @@ class DatasetLineageController @Inject() (
             db.async(DatasetLineageQuery.ForDestination(dest).setSources(rs))
               .map(r => Created(Json.toJson(r.getOrElse(0))))
         )
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
   def getSources(dest: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
       db.async(DatasetLineageQuery.ForDestination(dest).getSources())
         .map(rs => Ok(Json.toJson(rs)))
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
   def delete(dest: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
       db.async(DatasetLineageQuery.ForDestination(dest).delete()).map(r => Ok(Json.toJson(r)))
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
 }
