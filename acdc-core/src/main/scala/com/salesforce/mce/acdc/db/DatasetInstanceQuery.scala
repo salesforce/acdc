@@ -34,15 +34,20 @@ object DatasetInstanceQuery {
 
     def delete() = table.delete
 
-    def insert(location: String) =
-      DatasetInstanceTable() += DatasetInstanceTable.R(name, location, None, LocalDateTime.now())
+    def insert(location: String): DBIO[DatasetInstanceTable.R] =
+      (DatasetInstanceTable() returning DatasetInstanceTable()) += DatasetInstanceTable.R(
+        name,
+        location,
+        None,
+        LocalDateTime.now()
+      )
 
-    def create(location: String)(implicit ec: ExecutionContext) = (
-      for {
-        di <- get()
-        r <- if (di.isEmpty) insert(location) else DBIO.successful(0)
-      } yield r
-    ).transactionally
+    def create(location: String)(implicit
+      ec: ExecutionContext
+    ): DBIO[Either[DatasetInstanceTable.R, DatasetInstanceTable.R]] = get().flatMap {
+      case Some(r) => DBIO.successful(Left(r))
+      case None => insert(location).map(Right(_))
+    }.transactionally
 
     def mapTo(dataset: String) = table.map(_.dataset).update(Option(dataset))
 

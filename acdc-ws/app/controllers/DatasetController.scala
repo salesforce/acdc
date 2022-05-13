@@ -12,10 +12,11 @@ import javax.inject._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-import play.api.libs.json.{JsError, Json}
+import play.api.libs.json.{JsError, JsNull, JsValue, Json}
 import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetQuery
+import com.salesforce.mce.acdc.db.DatasetTable
 import models.CreateDatasetRequest
 import models.DatasetResponse
 import services.DatabaseService
@@ -30,6 +31,9 @@ class DatasetController @Inject() (
   ec: ExecutionContext
 ) extends AcdcAbstractController(cc, dbService) {
 
+  private def toResponse(r: DatasetTable.R): JsValue =
+    Json.toJson(DatasetResponse(r.name, r.createdAt, r.updatedAt))
+
   def create() = authAction.async(parse.json) {
     case ValidApiRequest(apiRole, req) =>
       req.body
@@ -38,12 +42,12 @@ class DatasetController @Inject() (
           e => Future.successful(BadRequest(JsError.toJson(e))),
           r =>
             db.async(DatasetQuery.ForName(r.name).create()).map {
-              case 0 => Conflict
-              case 1 => Created
+              case Left(r) => Conflict(toResponse(r))
+              case Right(r) => Created(toResponse(r))
             }
         )
     case InvalidApiRequest(_) =>
-      Future.successful(Results.Unauthorized)
+      Future.successful(Unauthorized(JsNull))
   }
 
   def update(name: String) = authAction.async(parse.json) {
@@ -53,28 +57,33 @@ class DatasetController @Inject() (
         .fold(
           e => Future.successful(BadRequest(JsError.toJson(e))),
           r =>
-            db.async(DatasetQuery.ForName(name).update(r.name)).map {
-              case -1 => Conflict("New name already exists")
-              case 0 => NotFound
-              case 1 => Ok("Updated")
+            db.async(DatasetQuery.ForName(name).update(r.name)).flatMap {
+              case Left(r) =>
+                Future.successful(Conflict(toResponse(r)))
+              case Right(0) =>
+                Future.successful(NotFound(JsNull))
+              case Right(_) =>
+                db.async(DatasetQuery.ForName(r.name).get())
+                  .map(newR => Ok(Json.toJson(newR.map(toResponse))))
             }
         )
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
   }
 
   def get(name: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
       db.async(DatasetQuery.ForName(name).get()).map {
-        case Some(r) => Ok(Json.toJson(DatasetResponse(r.name, r.createdAt, r.updatedAt)))
-        case None => NotFound
+        case Some(r) => Ok(toResponse(r))
+        case None => NotFound(JsNull)
       }
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
   def delete(name: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
       db.async(DatasetQuery.ForName(name).delete()).map(r => Ok(Json.toJson(r)))
-    case InvalidApiRequest(_) => Future.successful(Results.Unauthorized)
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
 }
