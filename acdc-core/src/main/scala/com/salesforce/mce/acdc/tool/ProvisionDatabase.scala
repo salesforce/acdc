@@ -9,6 +9,7 @@ package com.salesforce.mce.acdc.tool
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.Try
 
 import slick.jdbc.PostgresProfile.api._
 
@@ -16,26 +17,30 @@ import com.salesforce.mce.acdc.db._
 
 object ProvisionDatabase extends App {
 
+  val prodMode: Boolean = Try(args(0)).map(_.toBoolean).getOrElse(false)
+
   val schema = DatasetTable().schema ++ DatasetInstanceTable().schema ++
     DatasetLineageTable().schema
 
   val db = AcdcDatabase()
 
-  checkFirstTimeProvision(db)
+  if (prodMode) checkFirstTimeProvision(db)
 
   println("executing the following statements...")
   schema.dropIfExistsStatements.foreach(println)
-  Await.result(
-    db.connection.run(DBIO.seq(schema.dropIfExists)),
-    2.minutes
-  )
+  if (prodMode)
+    Await.result(
+      db.connection.run(DBIO.seq(schema.dropIfExists)),
+      2.minutes
+    )
 
   println("executing the following statements...")
   schema.createIfNotExistsStatements.foreach(println)
-  Await.result(
-    db.connection.run(DBIO.seq(schema.createIfNotExists)),
-    2.minutes
-  )
+  if (prodMode)
+    Await.result(
+      db.connection.run(DBIO.seq(schema.createIfNotExists)),
+      2.minutes
+    )
 
   /**
    * corner case for 1st time creation of schema, when the drop would give

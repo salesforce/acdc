@@ -27,12 +27,11 @@ class ApiRouter @Inject() (
     case DELETE(p"/dataset/$name") => dataset.delete(name)
 
     case POST(p"/instance") => instance.create()
-    case GET(p"/instance/$name") => instance.get(name)
-    case DELETE(p"/instance/$name") => instance.delete(name)
-    case PUT(p"/instance/$instName/dataset/$datasetName") => instance.mapTo(instName, datasetName)
-    case DELETE(p"/instance/$instName/dataset/$datasetName") =>
-      instance.removeFrom(instName, datasetName)
-    case GET(p"/instances/dataset/$dataset") => instance.forDataset(dataset)
+    case GET(p"/instance/$dataset/$name") => instance.get(dataset, name)
+    case DELETE(p"/instance/$dataset/$name") => instance.delete(dataset, name)
+    case PATCH(p"/instance/$dataset/$name") => instance.patch(dataset, name)
+
+    case GET(p"/instances/$dataset") => instance.forDataset(dataset)
 
     case PUT(p"/lineage/$destName") => lineage.setSources(destName)
     case GET(p"/lineage/$destName") => lineage.getSources(destName)

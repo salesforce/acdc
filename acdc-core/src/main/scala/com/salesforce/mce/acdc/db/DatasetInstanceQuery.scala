@@ -23,10 +23,7 @@ object DatasetInstanceQuery {
 
   def forDataset(dataset: String) = DatasetInstanceTable().filter(_.dataset === dataset).result
 
-  def deleteDatasetMappings(dataset: String) =
-    DatasetInstanceTable().filter(_.dataset === dataset).map(_.dataset).update(None)
-
-  case class ForName(name: String) {
+  case class ForInstance(dataset: String, name: String) {
 
     def table = DatasetInstanceTable().filter(_.name === name)
 
@@ -34,13 +31,17 @@ object DatasetInstanceQuery {
 
     def delete() = table.delete
 
-    def insert(location: String): DBIO[DatasetInstanceTable.R] =
+    def insert(location: String): DBIO[DatasetInstanceTable.R] = {
+      val currentTime = LocalDateTime.now()
       (DatasetInstanceTable() returning DatasetInstanceTable()) += DatasetInstanceTable.R(
+        dataset,
         name,
         location,
-        None,
-        LocalDateTime.now()
+        false,
+        currentTime,
+        currentTime
       )
+    }
 
     def create(location: String)(implicit
       ec: ExecutionContext
@@ -49,9 +50,7 @@ object DatasetInstanceQuery {
       case None => insert(location).map(Right(_))
     }.transactionally
 
-    def mapTo(dataset: String) = table.map(_.dataset).update(Option(dataset))
-
-    def removeFrom(dataset: String) = table.map(_.dataset).update(None)
+    def setActivation(isActive: Boolean) = table.map(_.isActive).update(isActive)
 
   }
 
