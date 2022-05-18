@@ -12,10 +12,12 @@ import java.time.LocalDateTime
 import play.api.libs.json.Json
 
 case class DatasetInstanceResponse(
+  dataset: String,
   name: String,
   location: String,
-  dataset: Option[String],
-  createdAt: LocalDateTime
+  isActive: Boolean,
+  createdAt: LocalDateTime,
+  updatedAt: LocalDateTime
 )
 
 object DatasetInstanceResponse {

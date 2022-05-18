@@ -20,6 +20,6 @@ case class DatasetResponse(
 object DatasetResponse {
 
   implicit val reads = Json.reads[DatasetResponse]
-
   implicit val writes = Json.writes[DatasetResponse]
+
 }

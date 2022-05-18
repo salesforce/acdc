@@ -17,7 +17,7 @@ import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetInstanceQuery
 import com.salesforce.mce.acdc.db.DatasetInstanceTable
-import models.{DatasetInstanceResponse, PostDatasetInstanceRequest}
+import models.{DatasetInstanceResponse, PostDatasetInstanceRequest, PatchDatasetInstanceRequest}
 import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
@@ -30,8 +30,9 @@ class DatasetInstanceController @Inject() (
   ec: ExecutionContext
 ) extends AcdcAbstractController(cc, dbService) {
 
-  private def toResponse(r: DatasetInstanceTable.R): JsValue =
-    Json.toJson(DatasetInstanceResponse(r.name, r.location, r.dataset, r.createdAt))
+  private def toResponse(r: DatasetInstanceTable.R): JsValue = Json.toJson(
+    DatasetInstanceResponse(r.dataset, r.name, r.location, r.isActive, r.createdAt, r.updatedAt)
+  )
 
   def create() = authAction.async(parse.json) {
     case ValidApiRequest(apiRole, req) =>
@@ -40,7 +41,7 @@ class DatasetInstanceController @Inject() (
         .fold(
           e => Future.successful(BadRequest(JsError.toJson(e))),
           r =>
-            db.async(DatasetInstanceQuery.ForName(r.name).create(r.location)).map {
+            db.async(DatasetInstanceQuery.ForInstance(r.dataset, r.name).create(r.location)).map {
               case Left(r) => Conflict(toResponse(r))
               case Right(r) => Created(toResponse(r))
             }
@@ -48,32 +49,35 @@ class DatasetInstanceController @Inject() (
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def get(name: String) = authAction.async {
+  def get(dataset: String, name: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
-      db.async(DatasetInstanceQuery.ForName(name).get()).map {
+      db.async(DatasetInstanceQuery.ForInstance(dataset, name).get()).map {
         case Some(r) => Ok(toResponse(r))
         case None => NotFound(JsNull)
       }
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def delete(name: String) = authAction.async {
+  def delete(dataset: String, name: String) = authAction.async {
     case ValidApiRequest(apiRole, req) =>
-      db.async(DatasetInstanceQuery.ForName(name).delete()).map(r => Ok(Json.toJson(r)))
-    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
-  }
-
-  def mapTo(instName: String, datasetName: String) = authAction.async {
-    case ValidApiRequest(apiRole, _) =>
-      db.async(DatasetInstanceQuery.ForName(instName).mapTo(datasetName))
+      db.async(DatasetInstanceQuery.ForInstance(dataset, name).delete())
         .map(r => Ok(Json.toJson(r)))
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def removeFrom(instName: String, datasetName: String) = authAction.async {
-    case ValidApiRequest(apiRole, _) =>
-      db.async(DatasetInstanceQuery.ForName(instName).removeFrom(datasetName))
-        .map(r => Ok(Json.toJson(r)))
+  def patch(dataset: String, name: String) = authAction.async(parse.json) {
+    case ValidApiRequest(apiRole, req) =>
+      req.body
+        .validate[PatchDatasetInstanceRequest]
+        .fold(
+          e => Future.successful(BadRequest(JsError.toJson(e))),
+          r => db.async(
+            DatasetInstanceQuery
+              .ForInstance(dataset, name)
+              .setActivation(r.isActive)
+              .map(r => Ok(Json.toJson(r)))
+          )
+        )
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
