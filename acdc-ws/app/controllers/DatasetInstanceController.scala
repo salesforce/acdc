@@ -81,4 +81,12 @@ class DatasetInstanceController @Inject() (
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
+  def forDataset(dataset: String) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
+      for {
+        rs <- db.async(DatasetInstanceQuery.forDataset(dataset))
+      } yield Ok(Json.toJson(rs.map(toResponse)))
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
+  }
+
 }

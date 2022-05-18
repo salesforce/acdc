@@ -31,6 +31,8 @@ class ApiRouter @Inject() (
     case DELETE(p"/instance/$dataset/$name") => instance.delete(dataset, name)
     case PATCH(p"/instance/$dataset/$name") => instance.patch(dataset, name)
 
+    case GET(p"/instances/$dataset") => instance.forDataset(dataset)
+
     case PUT(p"/lineage/$destName") => lineage.setSources(destName)
     case GET(p"/lineage/$destName") => lineage.getSources(destName)
     case DELETE(p"/lineage/$destName") => lineage.delete(destName)
