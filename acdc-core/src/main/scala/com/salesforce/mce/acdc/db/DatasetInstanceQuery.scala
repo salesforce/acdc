@@ -50,7 +50,8 @@ object DatasetInstanceQuery {
       case None => insert(location).map(Right(_))
     }.transactionally
 
-    def setActivation(isActive: Boolean) = table.map(_.isActive).update(isActive)
+    def setActivation(isActive: Boolean) =
+      table.map(r => (r.isActive, r.updatedAt)).update((isActive, LocalDateTime.now()))
 
   }
 
