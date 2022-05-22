@@ -9,7 +9,7 @@ package utils
 
 import java.net.URL
 
-import scala.jdk.CollectionConverters.CollectionHasAsScala
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 import com.typesafe.config.ConfigException
@@ -21,16 +21,15 @@ class AuthorizationSettings private (config: Config) {
 
   def authEnabled: Boolean = config.getBoolean(s"enabled")
 
-  def keyRoles: Map[String, List[String]] = config
-    .entrySet()
-    .asScala
-    .filter(_.getKey.startsWith(s"hashed-keys."))
-    .foldLeft(Map[String, List[String]]())((b, kv) => {
-      val k: String = kv.getKey.stripPrefix(s"hashed-keys.")
-      val configList: ConfigList = kv.getValue.asInstanceOf[ConfigList]
-      val v = configList.unwrapped().asScala.map(_.toString).toList
-      (b -- v) ++ v.map(j => (j, b.getOrElse(j, List.empty) ++ List(k))).toMap
-    })
+  def keyRoles: Map[String, List[String]] = {
+    val userRoles = for {
+      (r, us) <- config.getConfig("hashed-keys").root().asScala.toList
+      u <- us.asInstanceOf[ConfigList].unwrapped().asScala
+    } yield u.toString() -> r
+
+    userRoles.groupBy(_._1).view.mapValues(_.map(_._2)).toMap
+  }
+
 
   def ttl: Option[Long] = Try(config.getInt(s"ttl")) match {
     case Success(d) => Some(d)
