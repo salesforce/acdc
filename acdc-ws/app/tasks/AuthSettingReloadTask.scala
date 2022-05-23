@@ -16,7 +16,7 @@ import play.api.Logging
 
 import utils.Authorization
 
-class AuthSetttingReloadTask @Inject() (actorSystem: ActorSystem, auth: Authorization)(implicit
+class AuthSettingReloadTask @Inject() (actorSystem: ActorSystem, auth: Authorization)(implicit
   ec: ExecutionContext
 ) extends Logging {
 
