@@ -8,13 +8,15 @@
 import com.google.inject.AbstractModule
 
 import utils.{Authorization, AuthorizationSettings}
-import tasks.AuthSetttingReloadTask
+import tasks.AuthSettingReloadTask
 
 class Module extends AbstractModule {
 
   override def configure() = {
+    // Pass in custom implementation with configs for Authorization
     bind(classOf[Authorization]).toInstance(new Authorization(AuthorizationSettings()))
-    bind(classOf[AuthSetttingReloadTask]).asEagerSingleton()
+    // Activate authorization setting reload task
+    bind(classOf[AuthSettingReloadTask]).asEagerSingleton()
   }
 
 }
