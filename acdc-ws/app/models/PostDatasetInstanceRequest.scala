@@ -9,7 +9,12 @@ package models
 
 import play.api.libs.json.Json
 
-case class PostDatasetInstanceRequest(dataset: String, name: String, location: String)
+case class PostDatasetInstanceRequest(
+  dataset: String,
+  name: String,
+  location: String,
+  meta: Option[String]
+)
 
 object PostDatasetInstanceRequest {
 

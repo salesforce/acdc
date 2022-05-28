@@ -24,56 +24,24 @@ object ProvisionDatabase extends App {
 
   val db = AcdcDatabase()
 
-  if (prodMode) checkFirstTimeProvision(db)
-
   println("executing the following statements...")
-  schema.dropIfExistsStatements.foreach(println)
+  // note that dropIfExists does not work properly because it need to perform alter table to drop
+  // the constraint first
+  schema.drop.statements.foreach(println)
   if (prodMode)
     Await.result(
-      db.connection.run(DBIO.seq(schema.dropIfExists)),
+      db.connection.run(DBIO.seq(schema.drop)),
       2.minutes
     )
 
   println("executing the following statements...")
-  schema.createIfNotExistsStatements.foreach(println)
+  // note that we need to use create rather than createIfNotExists because there is a bug in slick
+  // that createIfNotExists does not add foreign key
+  schema.create.statements.foreach(println)
   if (prodMode)
     Await.result(
-      db.connection.run(DBIO.seq(schema.createIfNotExists)),
+      db.connection.run(DBIO.seq(schema.create)),
       2.minutes
     )
-
-  /**
-   * corner case for 1st time creation of schema, when the drop would give
-   * an error in a step before drop table dataset_lineage to
-   * alter (non-existing) table drop constraint for the primary key "pk_dataset_lineage"
-   * @param db  AcdcDatabase
-   */
-  private def checkFirstTimeProvision(db: AcdcDatabase): Unit = {
-
-    def datasetLineageOption() = {
-      lazy val public = "public"
-      lazy val datasetLineage = DatasetLineageTable().baseTableRow.tableName
-      sql"select tablename from pg_tables where schemaname = $public and tablename = $datasetLineage"
-        .as[String]
-        .headOption
-    }
-
-    Await.result(
-      db.connection.run(datasetLineageOption()),
-      2.minutes
-    ) match {
-      case None =>
-        println("First time to provision database...")
-        // create dataset_lineage to avoid error in the regular idempotent steps (schema dropIfExists, createIfNotExists)
-        DatasetLineageTable().schema.createIfNotExistsStatements.foreach(println)
-        Await.result(
-          db.connection.run(DBIO.seq(DatasetLineageTable().schema.createIfNotExists)),
-          2.minutes
-        )
-      case Some(_) =>
-        // no action necessary
-        println(s"Provision database re-run...")
-    }
-  }
 
 }

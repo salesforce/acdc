@@ -25,29 +25,30 @@ object DatasetInstanceQuery {
 
   case class ForInstance(dataset: String, name: String) {
 
-    def table = DatasetInstanceTable().filter(_.name === name)
+    def table = DatasetInstanceTable().filter(r => r.dataset === dataset && r.name === name)
 
     def get() = table.result.headOption
 
     def delete() = table.delete
 
-    def insert(location: String): DBIO[DatasetInstanceTable.R] = {
+    def insert(location: String, meta: Option[String]): DBIO[DatasetInstanceTable.R] = {
       val currentTime = LocalDateTime.now()
       (DatasetInstanceTable() returning DatasetInstanceTable()) += DatasetInstanceTable.R(
         dataset,
         name,
+        currentTime,
+        currentTime,
         location,
         false,
-        currentTime,
-        currentTime
+        meta
       )
     }
 
-    def create(location: String)(implicit
+    def create(location: String, meta: Option[String])(implicit
       ec: ExecutionContext
     ): DBIO[Either[DatasetInstanceTable.R, DatasetInstanceTable.R]] = get().flatMap {
       case Some(r) => DBIO.successful(Left(r))
-      case None => insert(location).map(Right(_))
+      case None => insert(location, meta).map(Right(_))
     }.transactionally
 
     def setActivation(isActive: Boolean) =

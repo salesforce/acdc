@@ -41,7 +41,7 @@ class DatasetController @Inject() (
         .fold(
           e => Future.successful(BadRequest(JsError.toJson(e))),
           r =>
-            db.async(DatasetQuery.ForName(r.name).create()).map {
+            db.async(DatasetQuery.ForName(r.name).create(r.meta)).map {
               case Left(r) => Conflict(toResponse(r))
               case Right(r) => Created(toResponse(r))
             }

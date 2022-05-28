@@ -17,7 +17,7 @@ import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetInstanceQuery
 import com.salesforce.mce.acdc.db.DatasetInstanceTable
-import models.{DatasetInstanceResponse, PostDatasetInstanceRequest, PatchDatasetInstanceRequest}
+import models.{DatasetInstanceResponse, PatchDatasetInstanceRequest, PostDatasetInstanceRequest}
 import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
@@ -41,10 +41,11 @@ class DatasetInstanceController @Inject() (
         .fold(
           e => Future.successful(BadRequest(JsError.toJson(e))),
           r =>
-            db.async(DatasetInstanceQuery.ForInstance(r.dataset, r.name).create(r.location)).map {
-              case Left(r) => Conflict(toResponse(r))
-              case Right(r) => Created(toResponse(r))
-            }
+            db.async(DatasetInstanceQuery.ForInstance(r.dataset, r.name).create(r.location, r.meta))
+              .map {
+                case Left(r) => Conflict(toResponse(r))
+                case Right(r) => Created(toResponse(r))
+              }
         )
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
@@ -71,12 +72,13 @@ class DatasetInstanceController @Inject() (
         .validate[PatchDatasetInstanceRequest]
         .fold(
           e => Future.successful(BadRequest(JsError.toJson(e))),
-          r => db.async(
-            DatasetInstanceQuery
-              .ForInstance(dataset, name)
-              .setActivation(r.isActive)
-              .map(r => Ok(Json.toJson(r)))
-          )
+          r =>
+            db.async(
+              DatasetInstanceQuery
+                .ForInstance(dataset, name)
+                .setActivation(r.isActive)
+                .map(r => Ok(Json.toJson(r)))
+            )
         )
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
