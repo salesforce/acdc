@@ -19,7 +19,9 @@ class DatasetTable(tag: Tag) extends Table[DatasetTable.R](tag, "dataset") {
 
   def updatedAt = column[LocalDateTime]("updated_at")
 
-  override def * = (name, createdAt, updatedAt).mapTo[DatasetTable.R]
+  def meta = column[Option[String]]("meta", O.SqlType("TEXT"))
+
+  override def * = (name, createdAt, updatedAt, meta).mapTo[DatasetTable.R]
 
 }
 
@@ -27,6 +29,11 @@ object DatasetTable {
 
   def apply() = TableQuery[DatasetTable]
 
-  case class R(name: String, createdAt: LocalDateTime, updatedAt: LocalDateTime)
+  case class R(
+    name: String,
+    createdAt: LocalDateTime,
+    updatedAt: LocalDateTime,
+    meta: Option[String]
+  )
 
 }

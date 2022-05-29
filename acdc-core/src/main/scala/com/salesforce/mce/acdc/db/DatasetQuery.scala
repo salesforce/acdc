@@ -25,14 +25,21 @@ object DatasetQuery {
 
     def delete() = table.delete
 
-    def insert(): DBIO[DatasetTable.R] =
-      (DatasetTable() returning DatasetTable()) += DatasetTable.R(name, now(), now())
+    def insert(meta: Option[String]): DBIO[DatasetTable.R] = {
+      val currentTime = now()
+      (DatasetTable() returning DatasetTable()) += DatasetTable.R(
+        name,
+        currentTime,
+        currentTime,
+        meta
+      )
+    }
 
-    def create()(implicit
+    def create(meta: Option[String])(implicit
       ec: ExecutionContext
     ): DBIO[Either[DatasetTable.R, DatasetTable.R]] = get().flatMap {
       case Some(r) => DBIO.successful(Left(r))
-      case None => insert().map(Right(_))
+      case None => insert(meta).map(Right(_))
     }.transactionally
 
     def update(

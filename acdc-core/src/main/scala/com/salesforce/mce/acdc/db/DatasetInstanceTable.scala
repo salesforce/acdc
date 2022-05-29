@@ -18,14 +18,16 @@ class DatasetInstanceTable(tag: Tag)
 
   def name = column[String]("name", O.SqlType("VARCHAR(256)"))
 
+  def createdAt = column[LocalDateTime]("created_at")
+
+  def updatedAt = column[LocalDateTime]("updated_at")
+
   // use 2048 for max url length
   def location = column[String]("location", O.SqlType("VARCHAR(2048)"))
 
   def isActive = column[Boolean]("is_active")
 
-  def createdAt = column[LocalDateTime]("created_at")
-
-  def updatedAt = column[LocalDateTime]("updated_at")
+  def meta = column[Option[String]]("meta", O.SqlType("TEXT"))
 
   def pk = primaryKey("pk_dataset_instance", (dataset, name))
 
@@ -36,7 +38,7 @@ class DatasetInstanceTable(tag: Tag)
   )
 
   override def * =
-    (dataset, name, location, isActive, createdAt, updatedAt).mapTo[DatasetInstanceTable.R]
+    (dataset, name, createdAt, updatedAt, location, isActive, meta).mapTo[DatasetInstanceTable.R]
 
 }
 
@@ -47,10 +49,11 @@ object DatasetInstanceTable {
   case class R(
     dataset: String,
     name: String,
+    createdAt: LocalDateTime,
+    updatedAt: LocalDateTime,
     location: String,
     isActive: Boolean,
-    createdAt: LocalDateTime,
-    updatedAt: LocalDateTime
+    meta: Option[String]
   )
 
 }

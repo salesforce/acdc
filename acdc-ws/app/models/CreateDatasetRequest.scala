@@ -9,7 +9,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class CreateDatasetRequest(name: String)
+case class CreateDatasetRequest(name: String, meta: Option[String])
 
 object CreateDatasetRequest {
 

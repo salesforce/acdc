@@ -18,7 +18,7 @@ class DatasetLineageTable(tag: Tag) extends Table[DatasetLineageTable.R](tag, "d
   def pk = primaryKey("pk_dataset_lineage", (fromDataset, toDataset))
 
   def fromDatasetTable =
-    foreignKey("fk_dataset_lineage_from_dataset", fromDataset, TableQuery[DatasetInstanceTable])(
+    foreignKey("fk_dataset_lineage_from_dataset", fromDataset, TableQuery[DatasetTable])(
       _.name,
       onUpdate = ForeignKeyAction.Cascade,
       // source table should not be deleted unless it's child table are also deleted
@@ -26,7 +26,7 @@ class DatasetLineageTable(tag: Tag) extends Table[DatasetLineageTable.R](tag, "d
     )
 
   def toDatasetTable =
-    foreignKey("fk_dataset_lineage_to_dataset", fromDataset, TableQuery[DatasetInstanceTable])(
+    foreignKey("fk_dataset_lineage_to_dataset", fromDataset, TableQuery[DatasetTable])(
       _.name,
       onUpdate = ForeignKeyAction.Cascade,
       onDelete = ForeignKeyAction.Cascade
