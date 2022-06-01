@@ -14,10 +14,11 @@ import play.api.libs.json.Json
 case class DatasetInstanceResponse(
   dataset: String,
   name: String,
+  createdAt: LocalDateTime,
+  updatedAt: LocalDateTime,
   location: String,
   isActive: Boolean,
-  createdAt: LocalDateTime,
-  updatedAt: LocalDateTime
+  meta: Option[String]
 )
 
 object DatasetInstanceResponse {

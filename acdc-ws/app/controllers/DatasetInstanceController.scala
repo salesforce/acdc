@@ -31,7 +31,15 @@ class DatasetInstanceController @Inject() (
 ) extends AcdcAbstractController(cc, dbService) {
 
   private def toResponse(r: DatasetInstanceTable.R): JsValue = Json.toJson(
-    DatasetInstanceResponse(r.dataset, r.name, r.location, r.isActive, r.createdAt, r.updatedAt)
+    DatasetInstanceResponse(
+      r.dataset,
+      r.name,
+      r.createdAt,
+      r.updatedAt,
+      r.location,
+      r.isActive,
+      r.meta
+    )
   )
 
   def create() = authAction.async(parse.json) {
