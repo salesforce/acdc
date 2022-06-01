@@ -32,7 +32,7 @@ class DatasetController @Inject() (
 ) extends AcdcAbstractController(cc, dbService) {
 
   private def toResponse(r: DatasetTable.R): JsValue =
-    Json.toJson(DatasetResponse(r.name, r.createdAt, r.updatedAt))
+    Json.toJson(DatasetResponse(r.name, r.createdAt, r.updatedAt, r.meta))
 
   def create() = authAction.async(parse.json) {
     case ValidApiRequest(apiRole, req) =>
