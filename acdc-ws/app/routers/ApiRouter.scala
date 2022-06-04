@@ -24,6 +24,7 @@ class ApiRouter @Inject() (
     case POST(p"/dataset") => dataset.create()
     case PUT(p"/dataset/$name") => dataset.update(name)
     case GET(p"/dataset/$name") => dataset.get(name)
+    case GET(p"/datasets" ? q"like=$like") => dataset.filter(like)
     case DELETE(p"/dataset/$name") => dataset.delete(name)
 
     case POST(p"/instance") => instance.create()
