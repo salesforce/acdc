@@ -21,6 +21,7 @@ import models.CreateDatasetRequest
 import models.DatasetResponse
 import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
+import play.api.libs.json.JsString
 
 @Singleton
 class DatasetController @Inject() (
@@ -82,8 +83,18 @@ class DatasetController @Inject() (
 
   def delete(name: String) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
-      db.async(DatasetQuery.ForName(name).delete()).map(r => Ok(Json.toJson(r)))
+      db.async(DatasetQuery.ForName(name).delete()).map {
+        case -1 => BadRequest(JsString("Cannot delete dataset with instances"))
+        case r => Ok(Json.toJson(r))
+      }
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
+  }
+
+  def filter(like: String) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
+      db.async(DatasetQuery.filter(like)).map(rs => Ok(Json.toJson(rs.map(toResponse))))
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
   }
 
 }

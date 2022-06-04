@@ -23,7 +23,14 @@ object DatasetQuery {
 
     def get(): DBIO[Option[DatasetTable.R]] = table.result.headOption
 
-    def delete() = table.delete
+    def delete()(implicit ec: ExecutionContext) = {
+      DatasetInstanceQuery.forDataset(name).headOption.flatMap {
+        case Some(_) =>
+          DBIO.successful(-1)
+        case None =>
+          table.delete
+      }
+    }
 
     def insert(meta: Option[String]): DBIO[DatasetTable.R] = {
       val currentTime = now()
@@ -54,5 +61,8 @@ object DatasetQuery {
         .transactionally
 
   }
+
+  def filter(like: String): DBIO[Seq[DatasetTable.R]] =
+    DatasetTable().filter(_.name.like(s"$like")).result
 
 }
