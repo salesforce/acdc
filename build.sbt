@@ -35,7 +35,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.3.+",
+      "org.postgresql" % "postgresql" % "42.4.+",
     )
   )
 

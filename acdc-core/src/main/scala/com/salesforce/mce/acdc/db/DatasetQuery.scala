@@ -15,10 +15,16 @@ import slick.jdbc.PostgresProfile.api._
 
 object DatasetQuery {
 
-  object OrderColumn extends Enumeration {
+  sealed trait OrderBy
+  object OrderBy {
+    case object CreatedAt extends OrderBy
+    case object UpdatedAt extends OrderBy
+  }
 
-    val CreatedAt = Value("created_at")
-    val UpdatedAt = Value("updated_at")
+  sealed trait Order
+  object Order {
+    case object Asc extends Order
+    case object Desc extends Order
   }
 
   def now() = LocalDateTime.now()
@@ -70,18 +76,24 @@ object DatasetQuery {
 
   def filter(
     like: String,
-    order: OrderColumn.Value,
+    orderBy: OrderBy,
+    order: Order,
     limit: Int,
     offset: Int
   ): DBIO[Seq[DatasetTable.R]] = {
-    val ordering = order match {
-      case OrderColumn.CreatedAt => t: DatasetTable => t.createdAt
-      case OrderColumn.UpdatedAt => t: DatasetTable => t.updatedAt
-      case _ => throw new MatchError("unexpected order")
+    val sortByColumn = (orderBy, order) match {
+      case (OrderBy.CreatedAt, Order.Desc) =>
+        t: DatasetTable => t.createdAt.desc
+      case (OrderBy.CreatedAt, Order.Asc) =>
+        t: DatasetTable => t.createdAt.asc
+      case (OrderBy.UpdatedAt, Order.Desc) =>
+        t: DatasetTable => t.updatedAt.desc
+      case (OrderBy.UpdatedAt, Order.Asc) =>
+        t: DatasetTable => t.updatedAt.asc
     }
     DatasetTable()
       .filter(_.name.like(s"$like"))
-      .sortBy(ordering(_).desc)
+      .sortBy(sortByColumn)
       .drop(offset)
       .take(limit)
       .result

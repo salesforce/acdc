@@ -15,8 +15,7 @@ import scala.concurrent.Future
 import play.api.libs.json.{JsError, JsNull, JsValue, Json}
 import play.api.mvc._
 
-import com.salesforce.mce.acdc.db.DatasetQuery
-import com.salesforce.mce.acdc.db.DatasetTable
+import com.salesforce.mce.acdc.db.{DatasetQuery, DatasetTable}
 import models.CreateDatasetRequest
 import models.DatasetResponse
 import play.api.libs.json.JsString
@@ -90,46 +89,64 @@ class DatasetController @Inject() (
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def filter(like: String, order: Option[String], page: Option[Int], perPage: Option[Int]) =
-    authAction.async {
-      case ValidApiRequest(apiRole, _) =>
-        val validated = for {
-          vOrder <- DatasetController.validateOrder(order)
-          vPage <- DatasetController.validateOne(page.getOrElse(1), "page")
-          limit <- DatasetController.validateOne(perPage.getOrElse(50), "per_page")
-        } yield (vOrder, limit, (vPage - 1) * limit)
+  def filter(
+    like: String,
+    orderBy: Option[String],
+    order: Option[String],
+    page: Option[Int],
+    perPage: Option[Int]
+  ) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
 
-        validated match {
-          case Right((o, limit, offset)) =>
-            db.async(DatasetQuery.filter(like, o, limit, offset))
-              .map(rs => Ok(Json.toJson(rs.map(toResponse))))
-          case Left(msg) =>
-            Future.successful(BadRequest(JsString(msg)))
-        }
+      val validated = for {
+        vOrderBy <- DatasetController.validateOrderBy(orderBy)
+        vOrder <- DatasetController.validateOrder(order)
+        vPage <- DatasetController.validateOne(page.getOrElse(1), "page")
+        limit <- DatasetController.validateOne(perPage.getOrElse(50), "per_page")
+      } yield (vOrderBy, vOrder, limit, (vPage - 1) * limit)
 
-      case InvalidApiRequest(_) =>
-        Future.successful(Unauthorized(JsNull))
-    }
+      validated match {
+        case Right((by, ord, limit, offset)) =>
+          db.async(DatasetQuery.filter(like, by, ord, limit, offset))
+            .map(rs => Ok(Json.toJson(rs.map(toResponse))))
+        case Left(msg) =>
+          Future.successful(BadRequest(JsString(msg)))
+      }
+
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
+  }
 
 }
 
 object DatasetController {
 
-  private def validateOrder(
-    order: Option[String]
-  ): Either[String, DatasetQuery.OrderColumn.Value] = {
-    order
-      .fold[Either[String, DatasetQuery.OrderColumn.Value]](
-        Right(DatasetQuery.OrderColumn.CreatedAt)
-      ) { o =>
-        try {
-          Right(DatasetQuery.OrderColumn.withName(o))
-        } catch {
-          case e: NoSuchElementException =>
-            Left(s"Unknow order $o")
-        }
+  private def validateOrderBy(
+    orderBy: Option[String]
+  ): Either[String, DatasetQuery.OrderBy] = {
+    orderBy
+      .fold[Either[String, DatasetQuery.OrderBy]](
+        Right(DatasetQuery.OrderBy.CreatedAt)
+      ) {
+        case "created_at" => Right(DatasetQuery.OrderBy.CreatedAt)
+        case "updated_at" => Right(DatasetQuery.OrderBy.UpdatedAt)
+        case other => Left(s"Unknow order_by $other")
       }
   }
+
+  private def validateOrder(
+    order: Option[String]
+  ): Either[String, DatasetQuery.Order] = {
+    order
+      .fold[Either[String, DatasetQuery.Order]](
+        Right(DatasetQuery.Order.Desc)
+      ) {
+        case "desc" => Right(DatasetQuery.Order.Desc)
+        case "asc" => Right(DatasetQuery.Order.Asc)
+        case other => Left(s"Unknow order $other")
+      }
+  }
+
 
   private def validateOne(num: Int, name: String): Either[String, Int] = {
     if (num < 1) Left(s"$name must be at least 1")
