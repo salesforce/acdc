@@ -19,9 +19,9 @@ import com.salesforce.mce.acdc.db.DatasetQuery
 import com.salesforce.mce.acdc.db.DatasetTable
 import models.CreateDatasetRequest
 import models.DatasetResponse
+import play.api.libs.json.JsString
 import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
-import play.api.libs.json.JsString
 
 @Singleton
 class DatasetController @Inject() (
@@ -90,11 +90,50 @@ class DatasetController @Inject() (
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def filter(like: String) = authAction.async {
-    case ValidApiRequest(apiRole, _) =>
-      db.async(DatasetQuery.filter(like)).map(rs => Ok(Json.toJson(rs.map(toResponse))))
-    case InvalidApiRequest(_) =>
-      Future.successful(Unauthorized(JsNull))
+  def filter(like: String, order: Option[String], page: Option[Int], perPage: Option[Int]) =
+    authAction.async {
+      case ValidApiRequest(apiRole, _) =>
+        val validated = for {
+          vOrder <- DatasetController.validateOrder(order)
+          vPage <- DatasetController.validateOne(page.getOrElse(1), "page")
+          limit <- DatasetController.validateOne(perPage.getOrElse(50), "per_page")
+        } yield (vOrder, limit, (vPage - 1) * limit)
+
+        validated match {
+          case Right((o, limit, offset)) =>
+            db.async(DatasetQuery.filter(like, o, limit, offset))
+              .map(rs => Ok(Json.toJson(rs.map(toResponse))))
+          case Left(msg) =>
+            Future.successful(BadRequest(JsString(msg)))
+        }
+
+      case InvalidApiRequest(_) =>
+        Future.successful(Unauthorized(JsNull))
+    }
+
+}
+
+object DatasetController {
+
+  private def validateOrder(
+    order: Option[String]
+  ): Either[String, DatasetQuery.OrderColumn.Value] = {
+    order
+      .fold[Either[String, DatasetQuery.OrderColumn.Value]](
+        Right(DatasetQuery.OrderColumn.CreatedAt)
+      ) { o =>
+        try {
+          Right(DatasetQuery.OrderColumn.withName(o))
+        } catch {
+          case e: NoSuchElementException =>
+            Left(s"Unknow order $o")
+        }
+      }
+  }
+
+  private def validateOne(num: Int, name: String): Either[String, Int] = {
+    if (num < 1) Left(s"$name must be at least 1")
+    else Right(num)
   }
 
 }

@@ -7,8 +7,8 @@
 
 import com.google.inject.AbstractModule
 
-import utils.{Authorization, AuthorizationSettings}
 import tasks.AuthSettingReloadTask
+import utils.{Authorization, AuthorizationSettings}
 
 class Module extends AbstractModule {
 
