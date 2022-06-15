@@ -27,11 +27,12 @@ class ApiRouter @Inject() (
     case GET(
           p"/datasets" ?
           q"like=$like" &
+          q_o"order_by=$orderBy" &
           q_o"order=$order" &
           q_o"page=${int(page)}" &
           q_o"per_page=${int(perPage)}"
         ) =>
-      dataset.filter(like, order, page, perPage)
+      dataset.filter(like, orderBy, order, page, perPage)
     case DELETE(p"/dataset/$name") => dataset.delete(name)
 
     case POST(p"/instance") => instance.create()
