@@ -41,6 +41,15 @@ class ApiRouter @Inject() (
     case PATCH(p"/instance/$dataset/$name") => instance.patch(dataset, name)
 
     case GET(p"/instances/$dataset") => instance.forDataset(dataset)
+    case GET(
+          p"/instances" ? q_o"dataset=$dataset" &
+          q_o"like=$like" &
+          q_o"order_by=$orderBy" &
+          q_o"order=$order" &
+          q_o"page=${int(page)}" &
+          q_o"per_page=${int(perPage)}"
+        ) =>
+      instance.filter(dataset, like, orderBy, order, page, perPage)
 
     case PUT(p"/lineage/$destName") => lineage.setSources(destName)
     case GET(p"/lineage/$destName") => lineage.getSources(destName)
