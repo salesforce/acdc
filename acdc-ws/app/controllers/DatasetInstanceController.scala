@@ -12,7 +12,7 @@ import javax.inject._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-import play.api.libs.json.{JsError, JsNull, JsValue, Json}
+import play.api.libs.json.{JsError, JsNull, JsString, JsValue, Json}
 import play.api.mvc._
 
 import com.salesforce.mce.acdc.db.DatasetInstanceQuery
@@ -97,6 +97,68 @@ class DatasetInstanceController @Inject() (
         rs <- db.async(DatasetInstanceQuery.forDataset(dataset))
       } yield Ok(Json.toJson(rs.map(toResponse)))
     case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
+  }
+
+  def filter(
+    dataset: Option[String],
+    like: Option[String],
+    orderBy: Option[String],
+    order: Option[String],
+    page: Option[Int],
+    perPage: Option[Int]
+  ) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
+      val validated = for {
+        vOrderBy <- DatasetInstanceController.validateOrderBy(orderBy)
+        vOrder <- DatasetInstanceController.validateOrder(order)
+        vPage <- DatasetInstanceController.validateOne(page.getOrElse(1), "page")
+        limit <- DatasetInstanceController.validateOne(perPage.getOrElse(50), "per_page")
+      } yield (vOrderBy, vOrder, limit, (vPage - 1) * limit)
+
+      validated match {
+        case Right((by, ord, limit, offset)) =>
+          db.async(DatasetInstanceQuery.filter(dataset, like, by, ord, limit, offset))
+            .map(rs => Ok(Json.toJson(rs.map(toResponse))))
+        case Left(msg) =>
+          Future.successful(BadRequest(JsString(msg)))
+      }
+
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
+  }
+
+}
+
+object DatasetInstanceController {
+
+  private def validateOrderBy(
+    orderBy: Option[String]
+  ): Either[String, DatasetInstanceQuery.OrderBy] = {
+    orderBy
+      .fold[Either[String, DatasetInstanceQuery.OrderBy]](
+        Right(DatasetInstanceQuery.OrderBy.CreatedAt)
+      ) {
+        case "created_at" => Right(DatasetInstanceQuery.OrderBy.CreatedAt)
+        case "updated_at" => Right(DatasetInstanceQuery.OrderBy.UpdatedAt)
+        case other => Left(s"Unknow order_by $other")
+      }
+  }
+
+  private def validateOrder(
+    order: Option[String]
+  ): Either[String, DatasetInstanceQuery.Order] = {
+    order
+      .fold[Either[String, DatasetInstanceQuery.Order]](
+        Right(DatasetInstanceQuery.Order.Desc)
+      ) {
+        case "desc" => Right(DatasetInstanceQuery.Order.Desc)
+        case "asc" => Right(DatasetInstanceQuery.Order.Asc)
+        case other => Left(s"Unknow order $other")
+      }
+  }
+
+  private def validateOne(num: Int, name: String): Either[String, Int] = {
+    if (num < 1) Left(s"$name must be at least 1")
+    else Right(num)
   }
 
 }

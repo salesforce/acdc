@@ -92,7 +92,7 @@ object DatasetQuery {
         t: DatasetTable => t.updatedAt.asc
     }
     DatasetTable()
-      .filter(_.name.like(s"$like"))
+      .filter(_.name.like(like))
       .sortBy(sortByColumn)
       .drop(offset)
       .take(limit)
