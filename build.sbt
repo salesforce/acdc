@@ -47,7 +47,10 @@ lazy val ws = (project in file("acdc-ws")).
     buildInfoKeys := Seq[BuildInfoKey](name, version),
     buildInfoPackage := "com.salesforce.mce.acdc.ws",
     libraryDependencies ++= Seq(
-      guice
+      guice,
+      "io.prometheus" % "simpleclient" % "0.16.0",
+      "io.prometheus" % "simpleclient_common" % "0.16.0",
+      "io.prometheus" % "simpleclient_hotspot" % "0.16.0"
     )
   ).
   dependsOn(core)

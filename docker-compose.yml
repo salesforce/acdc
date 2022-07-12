@@ -19,6 +19,8 @@ services:
       - acdc-postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    ports:
+      - 5432:5432
   flyway:
     image: flyway/flyway:latest-alpine
     volumes:
@@ -31,6 +33,11 @@ services:
       - db
     command:
       migrate
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8087:8080
 
 volumes:
   acdc-postgres-data:

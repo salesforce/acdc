@@ -1,3 +1,4 @@
 GET     /__status                   controllers.StatusController.status()
+GET     /__metrics                  controllers.StatusController.metrics()
 
 ->      /api/v1                     routers.ApiRouter

@@ -8,17 +8,35 @@
 package controllers
 
 import javax.inject._
-
 import play.api.libs.json._
 import play.api.mvc._
-
 import com.salesforce.mce.acdc.ws.BuildInfo
+import utils.Metrics.{apiLatencyGauge, apiLatencySummary, clearMetrics, setSumAvgToGauge}
+import utils.{MetricReporter, ProfileAction}
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class StatusController @Inject() (cc: ControllerComponents) extends AbstractController(cc) {
+class StatusController @Inject() (
+  cc: ControllerComponents,
+  reporter: MetricReporter
+) (implicit
+   ec: ExecutionContext
+)  extends AbstractController(cc) {
 
-  def status: Action[AnyContent] = Action { _ =>
-    Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
+  def status: Action[AnyContent] = ProfileAction(reporter) {
+    Action { _ =>
+      Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
+    }
+  }
+
+  def metrics: Action[AnyContent] = ProfileAction(reporter) {
+    Action.async { r: Request[AnyContent] =>
+        setSumAvgToGauge(apiLatencySummary, apiLatencyGauge)
+        val metricResults = reporter.metrics.map(output => Ok(output))
+        metricResults.onComplete((_ => clearMetrics()))
+        metricResults
+      }
   }
 
 }

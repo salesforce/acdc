@@ -6,9 +6,8 @@
  */
 
 import com.google.inject.AbstractModule
-
 import tasks.AuthSettingReloadTask
-import utils.{Authorization, AuthorizationSettings}
+import utils.{Authorization, AuthorizationSettings, MetricReporter, MetricReporterImpl}
 
 class Module extends AbstractModule {
 
@@ -17,6 +16,8 @@ class Module extends AbstractModule {
     bind(classOf[Authorization]).toInstance(new Authorization(AuthorizationSettings()))
     // Activate authorization setting reload task
     bind(classOf[AuthSettingReloadTask]).asEagerSingleton()
+    // Activate metrics
+    bind(classOf[MetricReporter]).to(classOf[MetricReporterImpl])
   }
 
 }
