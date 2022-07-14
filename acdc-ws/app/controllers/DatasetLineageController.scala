@@ -13,8 +13,8 @@ import scala.concurrent.Future
 import play.api.libs.json.{JsError, JsNull, Json}
 import play.api.mvc._
 import com.salesforce.mce.acdc.db.DatasetLineageQuery
-import services.DatabaseService
-import utils.{AuthTransformAction, InvalidApiRequest, MetricReporter, ProfileAction, ValidApiRequest}
+import services.{DatabaseService, MetricReporter}
+import utils.{AuthTransformAction, InvalidApiRequest, ProfileAction, ValidApiRequest}
 
 @Singleton
 class DatasetLineageController @Inject() (

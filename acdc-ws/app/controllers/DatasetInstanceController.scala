@@ -15,8 +15,8 @@ import play.api.mvc._
 import com.salesforce.mce.acdc.db.DatasetInstanceQuery
 import com.salesforce.mce.acdc.db.DatasetInstanceTable
 import models.{DatasetInstanceResponse, PatchDatasetInstanceRequest, PostDatasetInstanceRequest}
-import services.DatabaseService
-import utils.{AuthTransformAction, InvalidApiRequest, MetricReporter, ProfileAction, ValidApiRequest}
+import services.{DatabaseService, MetricReporter}
+import utils.{AuthTransformAction, InvalidApiRequest, ProfileAction, ValidApiRequest}
 
 @Singleton
 class DatasetInstanceController @Inject() (

@@ -11,8 +11,9 @@ import javax.inject._
 import play.api.libs.json._
 import play.api.mvc._
 import com.salesforce.mce.acdc.ws.BuildInfo
-import utils.Metrics.{apiLatencyGauge, apiLatencySummary, clearMetrics, setSumAvgToGauge}
-import utils.{MetricReporter, ProfileAction}
+import services.MetricReporter
+import services.Metrics.{apiLatencyGauge, apiLatencySummary, clearMetrics, setSumAvgToGauge}
+import utils.ProfileAction
 
 import scala.concurrent.ExecutionContext
 
@@ -24,10 +25,8 @@ class StatusController @Inject() (
    ec: ExecutionContext
 )  extends AbstractController(cc) {
 
-  def status: Action[AnyContent] = ProfileAction(reporter) {
-    Action { _ =>
-      Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
-    }
+  def status: Action[AnyContent] = Action { _ =>
+    Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
   }
 
   def metrics: Action[AnyContent] = ProfileAction(reporter) {
@@ -38,5 +37,7 @@ class StatusController @Inject() (
         metricResults
       }
   }
+
+  def unknownPath: Action[AnyContent] = Action {_ => BadRequest(JsString("Unknown path"))}
 
 }

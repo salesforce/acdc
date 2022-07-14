@@ -4,6 +4,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import akka.stream.Materializer
 import play.api.mvc.{Filter, RequestHeader, Result}
+import services.MetricReporter
 
 class MetricFilter @Inject()
 (
@@ -14,7 +15,7 @@ class MetricFilter @Inject()
 ) extends Filter {
 
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
-    if ( "/__status".equals(requestHeader.path) || "/__metrics".equals(requestHeader.path)) {
+    if ( metricReporter.checkPathIsDisabled(requestHeader.path) ) {
       nextFilter(requestHeader)
     } else {
       val requestTimer = metricReporter.httpDurationSeconds.startTimer()

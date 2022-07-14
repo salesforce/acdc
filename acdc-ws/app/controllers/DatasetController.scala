@@ -8,19 +8,16 @@
 package controllers
 
 import javax.inject._
-
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-
 import play.api.libs.json.{JsError, JsNull, JsValue, Json}
 import play.api.mvc._
-
 import com.salesforce.mce.acdc.db.{DatasetQuery, DatasetTable}
 import models.CreateDatasetRequest
 import models.DatasetResponse
 import play.api.libs.json.JsString
-import services.DatabaseService
-import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest, MetricReporter, ProfileAction}
+import services.{DatabaseService, MetricReporter}
+import utils.{AuthTransformAction, InvalidApiRequest, ProfileAction, ValidApiRequest}
 
 @Singleton
 class DatasetController @Inject() (

@@ -7,20 +7,30 @@
 
 package routers
 
-import javax.inject.Inject
-
+import com.typesafe.config.ConfigFactory
+import controllers._
+import play.api.Configuration
 import play.api.routing.sird._
 import play.api.routing.{Router, SimpleRouter}
-import controllers._
+
+import javax.inject.Inject
 
 class ApiRouter @Inject() (
   dataset: DatasetController,
   instance: DatasetInstanceController,
-  lineage: DatasetLineageController
+  lineage: DatasetLineageController,
+  statusController: StatusController
 ) extends SimpleRouter {
 
-  override def routes: Router.Routes = {
+  private lazy val config = new Configuration(ConfigFactory.load())
 
+  private val metricEndpoint = config.getOptional[String]("acdc.metrics.endpoint") match {
+    case Some(path) => path
+    case _ => "__metrics"
+  }
+
+
+  override def routes: Router.Routes = {
     case POST(p"/dataset") => dataset.create()
     case PUT(p"/dataset/$name") => dataset.update(name)
     case GET(p"/dataset/$name") => dataset.get(name)
@@ -54,6 +64,11 @@ class ApiRouter @Inject() (
     case PUT(p"/lineage/$destName") => lineage.setSources(destName)
     case GET(p"/lineage/$destName") => lineage.getSources(destName)
     case DELETE(p"/lineage/$destName") => lineage.delete(destName)
+
+    case GET(p"/$other") => if (other.equals(metricEndpoint))
+      statusController.metrics
+    else
+      statusController.unknownPath
 
   }
 

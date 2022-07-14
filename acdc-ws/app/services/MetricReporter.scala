@@ -1,8 +1,10 @@
-package utils
+package services
 
+import com.typesafe.config.ConfigFactory
 import io.prometheus.client._
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
+import play.api.Configuration
 
 import java.io.StringWriter
 import javax.inject.{Inject, Singleton}
@@ -33,7 +35,7 @@ object Metrics {
   val httpDurationSeconds: Histogram = Histogram.build
     .buckets(DefaultBucketValues: _*)
     .name("http_request_duration_seconds")
-    .help("Total HTTP Requests Count")
+    .help("Http Request Duration in Seconds")
     .register
 
   val httpTotalRequests: Counter = Counter.build
@@ -42,11 +44,15 @@ object Metrics {
     .labelNames("status")
     .register
 
+  val API_LATENCY_LABELS = Seq("path", "arguments", "method")
   val apiLatencySummary: Summary = Summary
     .build()
     .name("apiLatencySummary")
-    .labelNames("path", "arguments", "method")
+    .labelNames(API_LATENCY_LABELS : _*)
     .help("Profile API response time summary")
+    .quantile(0.5d, 0.001d)
+    .quantile(0.95d, 0.001d)
+    .quantile(0.99d, 0.001d)
     .register
 
   val apiLatencyGauge: Gauge = Gauge
@@ -68,8 +74,9 @@ object Metrics {
       samples <- summary.collect.asScala.toList.map{_.samples.asScala.toList}
       values: List[String] <- samples.map(_.labelValues.asScala.toList)
     } yield {
-      val (sum, count) = (summary.labels(values : _*).get().sum, summary.labels(values: _*).get().count)
-      if (count > 0) gauge.labels(values: _*).set(sum * 1d / count)
+      val v = values.take(API_LATENCY_LABELS.size)
+      val (sum, count) = (summary.labels(v : _*).get().sum, summary.labels(v: _*).get().count)
+      if (count > 0) gauge.labels(v: _*).set(sum * 1d / count)
     }
   }
 
@@ -83,6 +90,7 @@ object Metrics {
 trait MetricReporter {
 
   def metrics: Future[String]
+  def checkPathIsDisabled(path: String): Boolean
   val httpDurationSeconds: Histogram
   val httpTotalRequests: Counter
 }
@@ -93,11 +101,22 @@ class MetricReporterImpl @Inject() (implicit ec: ExecutionContext) extends Metri
   // Initialize the default jmx stats as metrics for prometheus
   DefaultExports.initialize()
 
+  private lazy val config = new Configuration(ConfigFactory.load())
+
+  private val bypassPaths = config.getOptional[Seq[String]]("acdc.metrics.bypass.paths") match {
+    case Some(paths) => paths.toSet
+    case _ => Set[String]()
+  }
+
   // Get metrics from the local prometheus collector default registry
   override def metrics: Future[String] = Future {
     val writer = new StringWriter()
     TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
     writer.toString
+  }
+
+  override def checkPathIsDisabled(path: String): Boolean = {
+    bypassPaths.contains(path)
   }
 
   override val httpDurationSeconds: Histogram = Metrics.httpDurationSeconds

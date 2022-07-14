@@ -6,8 +6,9 @@
  */
 
 import com.google.inject.AbstractModule
+import services.{MetricReporter, MetricReporterImpl}
 import tasks.AuthSettingReloadTask
-import utils.{Authorization, AuthorizationSettings, MetricReporter, MetricReporterImpl}
+import utils.{Authorization, AuthorizationSettings}
 
 class Module extends AbstractModule {
 
