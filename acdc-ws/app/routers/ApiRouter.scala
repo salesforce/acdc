@@ -24,12 +24,6 @@ class ApiRouter @Inject() (
 
   private lazy val config = new Configuration(ConfigFactory.load())
 
-  private val metricEndpoint = config.getOptional[String]("acdc.metrics.endpoint") match {
-    case Some(path) => path
-    case _ => "__metrics"
-  }
-
-
   override def routes: Router.Routes = {
     case POST(p"/dataset") => dataset.create()
     case PUT(p"/dataset/$name") => dataset.update(name)
@@ -65,10 +59,12 @@ class ApiRouter @Inject() (
     case GET(p"/lineage/$destName") => lineage.getSources(destName)
     case DELETE(p"/lineage/$destName") => lineage.delete(destName)
 
-    case GET(p"/$other") => if (other.equals(metricEndpoint))
-      statusController.metrics
-    else
-      statusController.unknownPath
+    case GET(p"/$other") => config.getOptional[String]("acdc.metrics.endpoint") match {
+      case Some(metricEndpoint) =>
+        if (other.equals(metricEndpoint))
+          statusController.metrics else statusController.unknownPath
+      case _ => statusController.unknownPath
+    }
 
   }
 

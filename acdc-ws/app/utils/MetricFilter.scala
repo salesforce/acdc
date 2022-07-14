@@ -15,7 +15,7 @@ class MetricFilter @Inject()
 ) extends Filter {
 
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
-    if ( metricReporter.checkPathIsDisabled(requestHeader.path) ) {
+    if ( metricReporter.checkPathIsDisabled(requestHeader.path) || metricReporter.checkMetricIsDisabled() ) {
       nextFilter(requestHeader)
     } else {
       val requestTimer = metricReporter.httpDurationSeconds.startTimer()

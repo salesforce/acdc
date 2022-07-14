@@ -90,6 +90,7 @@ object Metrics {
 trait MetricReporter {
 
   def metrics: Future[String]
+  def checkMetricIsDisabled(): Boolean
   def checkPathIsDisabled(path: String): Boolean
   val httpDurationSeconds: Histogram
   val httpTotalRequests: Counter
@@ -108,11 +109,17 @@ class MetricReporterImpl @Inject() (implicit ec: ExecutionContext) extends Metri
     case _ => Set[String]()
   }
 
+  private val disableMetrics = config.getOptional[String]("acdc.metrics.bypass.endPoint").getOrElse("").isEmpty
+
   // Get metrics from the local prometheus collector default registry
   override def metrics: Future[String] = Future {
     val writer = new StringWriter()
     TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
     writer.toString
+  }
+
+  override def checkMetricIsDisabled(): Boolean = {
+    disableMetrics
   }
 
   override def checkPathIsDisabled(path: String): Boolean = {
