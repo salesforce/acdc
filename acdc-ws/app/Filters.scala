@@ -6,4 +6,4 @@ import play.api.http.DefaultHttpFilters
 
 class Filters @Inject() (
   metricsFilter: MetricFilter
-) extends DefaultHttpFilters( metricsFilter)
+) extends DefaultHttpFilters(metricsFilter)

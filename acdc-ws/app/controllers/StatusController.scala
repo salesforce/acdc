@@ -7,37 +7,21 @@
 
 package controllers
 
-import javax.inject._
+import com.salesforce.mce.acdc.ws.BuildInfo
 import play.api.libs.json._
 import play.api.mvc._
-import com.salesforce.mce.acdc.ws.BuildInfo
-import services.MetricReporter
-import services.Metrics.{apiLatencyGauge, apiLatencySummary, clearMetrics, setSumAvgToGauge}
-import utils.ProfileAction
 
-import scala.concurrent.ExecutionContext
+import javax.inject._
 
 @Singleton
 class StatusController @Inject() (
-  cc: ControllerComponents,
-  reporter: MetricReporter
-) (implicit
-   ec: ExecutionContext
-)  extends AbstractController(cc) {
+  cc: ControllerComponents
+) extends AbstractController(cc) {
 
   def status: Action[AnyContent] = Action { _ =>
     Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
   }
 
-  def metrics: Action[AnyContent] = ProfileAction(reporter) {
-    Action.async { r: Request[AnyContent] =>
-        setSumAvgToGauge(apiLatencySummary, apiLatencyGauge)
-        val metricResults = reporter.metrics.map(output => Ok(output))
-        metricResults.onComplete((_ => clearMetrics()))
-        metricResults
-      }
-  }
-
-  def unknownPath: Action[AnyContent] = Action {_ => BadRequest(JsString("Unknown path"))}
+  def notFound: Action[AnyContent] = Action {_ => NotFound }
 
 }

@@ -109,7 +109,7 @@ class MetricReporterImpl @Inject() (implicit ec: ExecutionContext) extends Metri
     case _ => Set[String]()
   }
 
-  private val disableMetrics = config.getOptional[String]("acdc.metrics.bypass.endPoint").getOrElse("").isEmpty
+  private val disableMetrics = config.getOptional[String]("acdc.metrics.endpoint").getOrElse("").isEmpty
 
   // Get metrics from the local prometheus collector default registry
   override def metrics: Future[String] = Future {

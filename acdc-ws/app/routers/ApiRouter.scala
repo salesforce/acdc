@@ -19,7 +19,8 @@ class ApiRouter @Inject() (
   dataset: DatasetController,
   instance: DatasetInstanceController,
   lineage: DatasetLineageController,
-  statusController: StatusController
+  metrics: MetricController,
+  status: StatusController
 ) extends SimpleRouter {
 
   private lazy val config = new Configuration(ConfigFactory.load())
@@ -60,10 +61,8 @@ class ApiRouter @Inject() (
     case DELETE(p"/lineage/$destName") => lineage.delete(destName)
 
     case GET(p"/$other") => config.getOptional[String]("acdc.metrics.endpoint") match {
-      case Some(metricEndpoint) =>
-        if (other.equals(metricEndpoint))
-          statusController.metrics else statusController.unknownPath
-      case _ => statusController.unknownPath
+      case Some(endpoint) if other.equals(endpoint) => metrics.collect
+      case _ => status.notFound
     }
 
   }
