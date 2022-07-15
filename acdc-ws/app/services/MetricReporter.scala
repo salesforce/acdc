@@ -9,7 +9,6 @@ import play.api.Configuration
 import java.io.StringWriter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
 
 object Metrics {
 
@@ -55,13 +54,6 @@ object Metrics {
     .quantile(0.99d, 0.001d)
     .register
 
-  val apiLatencyGauge: Gauge = Gauge
-    .build()
-    .name("apiLatencyGauge")
-    .labelNames("path", "arguments", "method")
-    .help("Profile response time in seconds")
-    .register
-
   // exclude from clearMetrics() due to constant higher frequency
   val runtimeFreeMemory = Gauge
     .build()
@@ -69,21 +61,9 @@ object Metrics {
     .help("runtime free memory")
     .register
 
-  def setSumAvgToGauge(summary: Summary, gauge: Gauge): Unit = {
-    for {
-      samples <- summary.collect.asScala.toList.map{_.samples.asScala.toList}
-      values: List[String] <- samples.map(_.labelValues.asScala.toList)
-    } yield {
-      val v = values.take(API_LATENCY_LABELS.size)
-      val (sum, count) = (summary.labels(v : _*).get().sum, summary.labels(v: _*).get().count)
-      if (count > 0) gauge.labels(v: _*).set(sum * 1d / count)
-    }
-  }
-
   def clearMetrics(): Unit = {
     httpDurationSeconds.clear()
     apiLatencySummary.clear()
-    apiLatencyGauge.clear()
   }
 }
 

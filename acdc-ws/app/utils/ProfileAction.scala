@@ -28,12 +28,13 @@ case class ProfileAction[A](reporter: MetricReporter)(action: Action[A]) extends
     else {
       val (staticPath, args) = request.path
         .split("/")
+        .filter(_.nonEmpty)
         .foldLeft((List[String](), List[String]())) {
           case ( (Nil, l2), token) => (List(token), l2)
           case ( (h::t, l2), token ) => if (STATIC_PATH_MARKERS.contains(h)) (h::t, token::l2)
             else (token::h::t, l2)
         }
-      Some((staticPath.reverse.mkString("/") , args.reverse.mkString("/")))
+      Some((staticPath.reverse.mkString("-") , args.reverse.mkString("-")))
     }
   }
 
