@@ -23,7 +23,7 @@ case class ProfileAction[A](reporter: MetricReporter)(action: Action[A]) extends
   }
 
   private def parseRequest(request: Request[A]): Option[(String, String)] = {
-    if ( reporter.checkPathIsDisabled(request.path) || reporter.checkMetricIsDisabled() )
+    if ( reporter.checkPathIsDisabled(request.path) || reporter.checkMetricIsDisabled )
       None
     else {
       val (staticPath, args) = request.path

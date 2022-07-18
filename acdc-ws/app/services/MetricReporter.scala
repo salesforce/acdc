@@ -70,7 +70,7 @@ object Metrics {
 trait MetricReporter {
 
   def metrics: Future[String]
-  def checkMetricIsDisabled(): Boolean
+  def checkMetricIsDisabled: Boolean
   def checkPathIsDisabled(path: String): Boolean
   val httpDurationSeconds: Histogram
   val httpTotalRequests: Counter
@@ -98,7 +98,7 @@ class MetricReporterImpl @Inject() (implicit ec: ExecutionContext) extends Metri
     writer.toString
   }
 
-  override def checkMetricIsDisabled(): Boolean = {
+  override def checkMetricIsDisabled: Boolean = {
     disableMetrics
   }
 

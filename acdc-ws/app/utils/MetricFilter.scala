@@ -15,7 +15,7 @@ class MetricFilter @Inject()
 ) extends Filter {
 
   def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
-    if ( metricReporter.checkPathIsDisabled(requestHeader.path) || metricReporter.checkMetricIsDisabled() ) {
+    if ( metricReporter.checkPathIsDisabled(requestHeader.path) || metricReporter.checkMetricIsDisabled ) {
       nextFilter(requestHeader)
     } else {
       val requestTimer = metricReporter.httpDurationSeconds.startTimer()
@@ -23,15 +23,13 @@ class MetricFilter @Inject()
         result => {
           metricReporter.httpTotalRequests.labels(s"${result.header.status}").inc()
 
-          if (result.header.status < 500 || result.header.status >= 600) {
+          if (result.header.status < 500 || result.header.status >= 600)
             requestTimer.close()
-          }
 
           result
         },
         exception => {
           metricReporter.httpTotalRequests.labels("500").inc()
-
           exception
         }
       )
