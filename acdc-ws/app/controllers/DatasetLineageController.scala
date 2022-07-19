@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import play.api.libs.json.{JsError, JsNull, Json}
 import play.api.mvc._
 import com.salesforce.mce.acdc.db.DatasetLineageQuery
-import services.{DatabaseService}
+import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton
@@ -22,7 +22,7 @@ class DatasetLineageController @Inject() (
   dbService: DatabaseService,
   authAction: AuthTransformAction
 )(implicit
- ec: ExecutionContext
+  ec: ExecutionContext
 ) extends AcdcAbstractController(cc, dbService) {
 
   def setSources(dest: String) = authAction.async(parse.json) {

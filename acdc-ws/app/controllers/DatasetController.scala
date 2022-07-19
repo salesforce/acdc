@@ -16,7 +16,7 @@ import com.salesforce.mce.acdc.db.{DatasetQuery, DatasetTable}
 import models.CreateDatasetRequest
 import models.DatasetResponse
 import play.api.libs.json.JsString
-import services.{DatabaseService}
+import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton

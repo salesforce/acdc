@@ -7,11 +7,11 @@
 
 package controllers
 
+import javax.inject._
+
 import com.salesforce.mce.acdc.ws.BuildInfo
 import play.api.libs.json._
 import play.api.mvc._
-
-import javax.inject._
 
 @Singleton
 class StatusController @Inject() (
@@ -22,6 +22,6 @@ class StatusController @Inject() (
     Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
   }
 
-  def notFound: Action[AnyContent] = Action {_ => NotFound }
+  def notFound: Action[AnyContent] = Action { _ => NotFound }
 
 }
