@@ -6,7 +6,7 @@
  */
 
 import com.google.inject.AbstractModule
-import services.{MetricReporter, MetricReporterImpl}
+import services.{Metric, PrometheusMetric}
 import tasks.AuthSettingReloadTask
 import utils.{Authorization, AuthorizationSettings}
 
@@ -18,7 +18,7 @@ class Module extends AbstractModule {
     // Activate authorization setting reload task
     bind(classOf[AuthSettingReloadTask]).asEagerSingleton()
     // Activate metrics
-    bind(classOf[MetricReporter]).to(classOf[MetricReporterImpl])
+    bind(classOf[Metric]).to(classOf[PrometheusMetric])
   }
 
 }

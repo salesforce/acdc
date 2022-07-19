@@ -16,15 +16,14 @@ import com.salesforce.mce.acdc.db.{DatasetQuery, DatasetTable}
 import models.CreateDatasetRequest
 import models.DatasetResponse
 import play.api.libs.json.JsString
-import services.{DatabaseService, MetricReporter}
-import utils.{AuthTransformAction, InvalidApiRequest, ProfileAction, ValidApiRequest}
+import services.{DatabaseService}
+import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
 @Singleton
 class DatasetController @Inject() (
   cc: ControllerComponents,
   dbService: DatabaseService,
-  authAction: AuthTransformAction,
-  reporter: MetricReporter
+  authAction: AuthTransformAction
 )(implicit
   ec: ExecutionContext
 ) extends AcdcAbstractController(cc, dbService) {
@@ -32,67 +31,59 @@ class DatasetController @Inject() (
   private def toResponse(r: DatasetTable.R): JsValue =
     Json.toJson(DatasetResponse(r.name, r.createdAt, r.updatedAt, r.meta))
 
-  def create() = ProfileAction(reporter) {
-    authAction.async(parse.json) {
-      case ValidApiRequest(apiRole, req) =>
-        req.body
-          .validate[CreateDatasetRequest]
-          .fold(
-            e => Future.successful(BadRequest(JsError.toJson(e))),
-            r =>
-              db.async(DatasetQuery.ForName(r.name).create(r.meta)).map {
-                case Left(r) => Conflict(toResponse(r))
-                case Right(r) => Created(toResponse(r))
-              }
-          )
-      case InvalidApiRequest(_) =>
-        Future.successful(Unauthorized(JsNull))
-    }
+  def create() = authAction.async(parse.json) {
+    case ValidApiRequest(apiRole, req) =>
+      req.body
+        .validate[CreateDatasetRequest]
+        .fold(
+          e => Future.successful(BadRequest(JsError.toJson(e))),
+          r =>
+            db.async(DatasetQuery.ForName(r.name).create(r.meta)).map {
+              case Left(r) => Conflict(toResponse(r))
+              case Right(r) => Created(toResponse(r))
+            }
+        )
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
   }
 
-  def update(name: String) = ProfileAction(reporter) {
-    authAction.async(parse.json) {
-      case ValidApiRequest(apiRole, req) =>
-        req.body
-          .validate[CreateDatasetRequest]
-          .fold(
-            e => Future.successful(BadRequest(JsError.toJson(e))),
-            r =>
-              db.async(DatasetQuery.ForName(name).update(r.name)).flatMap {
-                case Left(r) =>
-                  Future.successful(Conflict(toResponse(r)))
-                case Right(0) =>
-                  Future.successful(NotFound(JsNull))
-                case Right(_) =>
-                  db.async(DatasetQuery.ForName(r.name).get())
-                    .map(newR => Ok(Json.toJson(newR.map(toResponse))))
-              }
-          )
-      case InvalidApiRequest(_) =>
-        Future.successful(Unauthorized(JsNull))
-    }
+  def update(name: String) = authAction.async(parse.json) {
+    case ValidApiRequest(apiRole, req) =>
+      req.body
+        .validate[CreateDatasetRequest]
+        .fold(
+          e => Future.successful(BadRequest(JsError.toJson(e))),
+          r =>
+            db.async(DatasetQuery.ForName(name).update(r.name)).flatMap {
+              case Left(r) =>
+                Future.successful(Conflict(toResponse(r)))
+              case Right(0) =>
+                Future.successful(NotFound(JsNull))
+              case Right(_) =>
+                db.async(DatasetQuery.ForName(r.name).get())
+                  .map(newR => Ok(Json.toJson(newR.map(toResponse))))
+            }
+        )
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
   }
 
-  def get(name: String) = ProfileAction(reporter) {
-    authAction.async {
-      case ValidApiRequest(apiRole, _) =>
-        db.async(DatasetQuery.ForName(name).get()).map {
-          case Some(r) => Ok(toResponse(r))
-          case None => NotFound(JsNull)
-        }
-      case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
-    }
+  def get(name: String) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
+      db.async(DatasetQuery.ForName(name).get()).map {
+        case Some(r) => Ok(toResponse(r))
+        case None => NotFound(JsNull)
+      }
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
-  def delete(name: String) = ProfileAction(reporter) {
-    authAction.async {
-      case ValidApiRequest(apiRole, _) =>
-        db.async(DatasetQuery.ForName(name).delete()).map {
-          case -1 => BadRequest(JsString("Cannot delete dataset with instances"))
-          case r => Ok(Json.toJson(r))
-        }
-      case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
-    }
+  def delete(name: String) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
+      db.async(DatasetQuery.ForName(name).delete()).map {
+        case -1 => BadRequest(JsString("Cannot delete dataset with instances"))
+        case r => Ok(Json.toJson(r))
+      }
+    case InvalidApiRequest(_) => Future.successful(Unauthorized(JsNull))
   }
 
   def filter(
@@ -101,28 +92,26 @@ class DatasetController @Inject() (
     order: Option[String],
     page: Option[Int],
     perPage: Option[Int]
-  ) = ProfileAction(reporter) {
-    authAction.async {
-      case ValidApiRequest(apiRole, _) =>
+  ) = authAction.async {
+    case ValidApiRequest(apiRole, _) =>
 
-        val validated = for {
-          vOrderBy <- DatasetController.validateOrderBy(orderBy)
-          vOrder <- DatasetController.validateOrder(order)
-          vPage <- DatasetController.validateOne(page.getOrElse(1), "page")
-          limit <- DatasetController.validateOne(perPage.getOrElse(50), "per_page")
-        } yield (vOrderBy, vOrder, limit, (vPage - 1) * limit)
+      val validated = for {
+        vOrderBy <- DatasetController.validateOrderBy(orderBy)
+        vOrder <- DatasetController.validateOrder(order)
+        vPage <- DatasetController.validateOne(page.getOrElse(1), "page")
+        limit <- DatasetController.validateOne(perPage.getOrElse(50), "per_page")
+      } yield (vOrderBy, vOrder, limit, (vPage - 1) * limit)
 
-        validated match {
-          case Right((by, ord, limit, offset)) =>
-            db.async(DatasetQuery.filter(like, by, ord, limit, offset))
-              .map(rs => Ok(Json.toJson(rs.map(toResponse))))
-          case Left(msg) =>
-            Future.successful(BadRequest(JsString(msg)))
-        }
+      validated match {
+        case Right((by, ord, limit, offset)) =>
+          db.async(DatasetQuery.filter(like, by, ord, limit, offset))
+            .map(rs => Ok(Json.toJson(rs.map(toResponse))))
+        case Left(msg) =>
+          Future.successful(BadRequest(JsString(msg)))
+      }
 
-      case InvalidApiRequest(_) =>
-        Future.successful(Unauthorized(JsNull))
-    }
+    case InvalidApiRequest(_) =>
+      Future.successful(Unauthorized(JsNull))
   }
 
 }
