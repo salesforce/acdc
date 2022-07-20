@@ -1,20 +1,22 @@
 package services
 
+import java.io.StringWriter
+import javax.inject.{Inject, Singleton}
+
+import scala.concurrent.{ExecutionContext, Future}
+
 import com.typesafe.config.ConfigFactory
+import play.api.Configuration
+import play.api.mvc.RequestHeader
 import io.prometheus.client._
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
-import play.api.Configuration
-import play.api.mvc.RequestHeader
-
-import java.io.StringWriter
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 trait Metric {
   private lazy val config = new Configuration(ConfigFactory.load())
 
-  private val disableMetrics = config.getOptional[String]("acdc.metrics.endpoint").getOrElse("").isEmpty
+  private val disableMetrics =
+    config.getOptional[String]("acdc.metrics.endpoint").getOrElse("").isEmpty
 
   private val bypassPaths = config.getOptional[Seq[String]]("acdc.metrics.bypass.paths") match {
     case Some(paths) => paths.toSet
@@ -24,18 +26,19 @@ trait Metric {
   private val STATIC_PATH_MARKERS = Seq("instance", "dataset", "lineage", "__metrics", "__status")
 
   def parseRequest(request: RequestHeader): Option[(String, String)] = {
-    if ( checkPathIsDisabled(request.path) || checkMetricIsDisabled )
+    if (checkPathIsDisabled(request.path) || checkMetricIsDisabled)
       None
     else {
       val (staticPath, args) = request.path
         .split("/")
         .filter(_.nonEmpty)
         .foldLeft((List[String](), List[String]())) {
-          case ( (Nil, l2), token) => (List(token), l2)
-          case ( (h::t, l2), token ) => if (STATIC_PATH_MARKERS.contains(h)) (h::t, token::l2)
-          else (token::h::t, l2)
+          case ((Nil, l2), token) => (List(token), l2)
+          case ((h :: t, l2), token) =>
+            if (STATIC_PATH_MARKERS.contains(h)) (h :: t, token :: l2)
+            else (token :: h :: t, l2)
         }
-      Some((staticPath.reverse.mkString("-") , args.reverse.mkString("-")))
+      Some((staticPath.reverse.mkString("-"), args.reverse.mkString("-")))
     }
   }
 
@@ -43,7 +46,7 @@ trait Metric {
 
   def checkPathIsDisabled(path: String): Boolean = { bypassPaths.contains(path) }
 
-  def incrementStatusCount(status: String) : Unit
+  def incrementStatusCount(status: String): Unit
 
   def startApiTimer(labels: String*): () => Unit
 
@@ -52,7 +55,6 @@ trait Metric {
   def clear(): Unit
 
 }
-
 
 @Singleton
 class PrometheusMetric @Inject() (implicit ec: ExecutionContext) extends Metric {
@@ -75,11 +77,11 @@ class PrometheusMetric @Inject() (implicit ec: ExecutionContext) extends Metric 
     .quantile(0.99d, 0.001d)
     .register
 
-  override def incrementStatusCount(status: String) : Unit = {
+  override def incrementStatusCount(status: String): Unit = {
     httpStatusCount.labels(status).inc()
   }
 
-  override def startApiTimer(labels: String*): () => Unit  = {
+  override def startApiTimer(labels: String*): () => Unit = {
     val timer = apiLatency.labels(labels: _*).startTimer()
     val callback = () => timer.close
     callback

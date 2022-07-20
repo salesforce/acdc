@@ -6,6 +6,7 @@
  */
 
 import com.google.inject.AbstractModule
+
 import services.{Metric, PrometheusMetric}
 import tasks.AuthSettingReloadTask
 import utils.{Authorization, AuthorizationSettings}

@@ -1,9 +1,12 @@
 package utils
 
 import javax.inject.Inject
+
 import scala.concurrent.{ExecutionContext, Future}
 import akka.stream.Materializer
+
 import play.api.mvc.{Filter, RequestHeader, Result}
+
 import services.Metric
 
 class MetricFilter @Inject() (

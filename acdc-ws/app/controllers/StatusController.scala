@@ -9,9 +9,10 @@ package controllers
 
 import javax.inject._
 
-import com.salesforce.mce.acdc.ws.BuildInfo
 import play.api.libs.json._
 import play.api.mvc._
+
+import com.salesforce.mce.acdc.ws.BuildInfo
 
 @Singleton
 class StatusController @Inject() (
