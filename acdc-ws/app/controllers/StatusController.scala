@@ -15,10 +15,14 @@ import play.api.mvc._
 import com.salesforce.mce.acdc.ws.BuildInfo
 
 @Singleton
-class StatusController @Inject() (cc: ControllerComponents) extends AbstractController(cc) {
+class StatusController @Inject() (
+  cc: ControllerComponents
+) extends AbstractController(cc) {
 
   def status: Action[AnyContent] = Action { _ =>
     Ok(Json.obj("status" -> "ok", "version" -> BuildInfo.version))
   }
+
+  def notFound: Action[AnyContent] = Action { _ => NotFound }
 
 }

@@ -7,6 +7,7 @@
 
 import com.google.inject.AbstractModule
 
+import services.{Metric, PrometheusMetric}
 import tasks.AuthSettingReloadTask
 import utils.{Authorization, AuthorizationSettings}
 
@@ -17,6 +18,8 @@ class Module extends AbstractModule {
     bind(classOf[Authorization]).toInstance(new Authorization(AuthorizationSettings()))
     // Activate authorization setting reload task
     bind(classOf[AuthSettingReloadTask]).asEagerSingleton()
+    // Activate metrics
+    bind(classOf[Metric]).to(classOf[PrometheusMetric])
   }
 
 }

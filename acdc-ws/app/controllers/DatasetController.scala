@@ -9,16 +9,13 @@ package controllers
 
 import javax.inject._
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.libs.json.{JsError, JsNull, JsValue, Json}
-import play.api.mvc._
+import play.api.libs.json.{JsError, JsNull, JsString, JsValue, Json}
+import play.api.mvc.ControllerComponents
 
 import com.salesforce.mce.acdc.db.{DatasetQuery, DatasetTable}
-import models.CreateDatasetRequest
-import models.DatasetResponse
-import play.api.libs.json.JsString
+import models.{CreateDatasetRequest, DatasetResponse}
 import services.DatabaseService
 import utils.{AuthTransformAction, InvalidApiRequest, ValidApiRequest}
 
@@ -97,7 +94,6 @@ class DatasetController @Inject() (
     perPage: Option[Int]
   ) = authAction.async {
     case ValidApiRequest(apiRole, _) =>
-
       val validated = for {
         vOrderBy <- DatasetController.validateOrderBy(orderBy)
         vOrder <- DatasetController.validateOrder(order)
@@ -146,7 +142,6 @@ object DatasetController {
         case other => Left(s"Unknow order $other")
       }
   }
-
 
   private def validateOne(num: Int, name: String): Either[String, Int] = {
     if (num < 1) Left(s"$name must be at least 1")

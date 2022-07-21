@@ -1,6 +1,9 @@
 val slickVersion = "3.3.3"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
+val prometheusClient = "io.prometheus" % "simpleclient" % "0.16.0"
+val prometheusCommon = "io.prometheus" % "simpleclient_common" % "0.16.0"
+val prometheusHotSpot = "io.prometheus" % "simpleclient_hotspot" % "0.16.0"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
@@ -47,7 +50,10 @@ lazy val ws = (project in file("acdc-ws")).
     buildInfoKeys := Seq[BuildInfoKey](name, version),
     buildInfoPackage := "com.salesforce.mce.acdc.ws",
     libraryDependencies ++= Seq(
-      guice
+      guice,
+      prometheusClient,
+      prometheusCommon,
+      prometheusHotSpot
     )
   ).
   dependsOn(core)
