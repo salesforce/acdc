@@ -27,12 +27,12 @@ class MetricFilter @Inject() (
           .transform(
             result => {
               metric.incrementStatusCount(result.header.status.toString)
-              if (result.header.status < 500 || result.header.status >= 600)
-                stopTimerCallback()
+              stopTimerCallback()
               result
             },
             exception => {
               metric.incrementStatusCount("500")
+              stopTimerCallback()
               exception
             }
           )

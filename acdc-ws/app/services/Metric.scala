@@ -23,7 +23,7 @@ trait Metric {
     case _ => Set[String]()
   }
 
-  private val STATIC_PATH_MARKERS = Seq("instance", "dataset", "lineage", "__metrics", "__status")
+  private val staticPathMarkers = Seq("instance", "dataset", "lineage", "__metrics", "__status")
 
   def parseRequest(request: RequestHeader): Option[(String, String)] = {
     if (checkPathIsDisabled(request.path) || checkMetricIsDisabled)
@@ -35,7 +35,7 @@ trait Metric {
         .foldLeft((List[String](), List[String]())) {
           case ((Nil, l2), token) => (List(token), l2)
           case ((h :: t, l2), token) =>
-            if (STATIC_PATH_MARKERS.contains(h)) (h :: t, token :: l2)
+            if (staticPathMarkers.contains(h)) (h :: t, token :: l2)
             else (token :: h :: t, l2)
         }
       Some((staticPath.reverse.mkString("-"), args.reverse.mkString("-")))
@@ -94,6 +94,6 @@ class PrometheusMetric @Inject() (implicit ec: ExecutionContext) extends Metric 
     writer.toString
   }
 
-  override def clear(): Unit = { apiLatency.clear() }
+  override def clear(): Unit = {}
 
 }
