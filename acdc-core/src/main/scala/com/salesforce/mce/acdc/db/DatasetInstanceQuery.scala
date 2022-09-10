@@ -66,6 +66,10 @@ object DatasetInstanceQuery {
       .result
   }
 
+  def expire() = {
+    DatasetInstanceTable().filter(_.updatedAt < LocalDateTime.now().minusDays(90)).delete
+  }
+
   case class ForInstance(dataset: String, name: String) {
 
     def table = DatasetInstanceTable().filter(r => r.dataset === dataset && r.name === name)
