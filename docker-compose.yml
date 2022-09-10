@@ -8,6 +8,7 @@ services:
       - ./:/acdc/ws
     environment:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      DATA_TTL: "${DATA_TTL}"
     ports:
       - 9001:9000
     tty: true # for easy debugging

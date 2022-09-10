@@ -19,8 +19,13 @@ import play.api.Logging
 import services.DatabaseService
 
 import com.salesforce.mce.acdc.db.{DatasetInstanceQuery, ExpirationTaskQuery}
+import utils.DbConfig
 
-class DataInstExpirationTask @Inject()(actorSystem: ActorSystem, dbService: DatabaseService)(implicit
+class DataInstExpirationTask @Inject()(
+  actorSystem: ActorSystem,
+  dbService: DatabaseService,
+  dbConfig: DbConfig
+)(implicit
   ec: ExecutionContext
 ) extends Logging {
 
@@ -31,10 +36,10 @@ class DataInstExpirationTask @Inject()(actorSystem: ActorSystem, dbService: Data
   def refresh(): Unit = {
     actorSystem.scheduler.scheduleOnce(refreshDelay) {
       val latest = db.sync(ExpirationTaskQuery.getLatest())
-      if (latest.forall(_.isBefore(LocalDateTime.now().minusSeconds(30)))) {
+      if (latest.forall(_.isBefore(LocalDateTime.now().minusDays(1)))) {
         db.sync(ExpirationTaskQuery.insert(hostName))
-        val count = db.sync(DatasetInstanceQuery.expire())
-        logger.warn(s"Expired $count records from dataset_instance ...")
+        val count = db.sync(DatasetInstanceQuery.expire(dbConfig.ttl))
+        logger.info(s"Expired $count records from dataset_instance ...")
       }
 
       refresh()

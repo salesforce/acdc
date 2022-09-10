@@ -66,8 +66,8 @@ object DatasetInstanceQuery {
       .result
   }
 
-  def expire() = {
-    DatasetInstanceTable().filter(_.updatedAt < LocalDateTime.now().minusDays(90)).delete
+  def expire(ttl: Int) = {
+    DatasetInstanceTable().filter(_.updatedAt < LocalDateTime.now().minusDays(ttl)).delete
   }
 
   case class ForInstance(dataset: String, name: String) {
