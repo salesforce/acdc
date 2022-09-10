@@ -24,7 +24,7 @@ class DataInstExpirationTask @Inject()(actorSystem: ActorSystem, dbService: Data
   ec: ExecutionContext
 ) extends Logging {
 
-  val refreshDelay: FiniteDuration = 10.second
+  val refreshDelay: FiniteDuration = 12.hour
   val hostName = (InetAddress.getLocalHost.getHostName + UUID.randomUUID().toString).take(256)
   def db = dbService.db
 
