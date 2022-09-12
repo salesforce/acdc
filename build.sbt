@@ -24,10 +24,7 @@ lazy val commonSettings = Seq(
 lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(
-    name := "acdc",
-    libraryDependencies ++= Seq(
-      // Add your dependencies here
-    )
+    name := "acdc"
   ).
   aggregate(core, ws)
 
@@ -38,7 +35,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.4.+",
+      "org.postgresql" % "postgresql" % "42.4.+"
     )
   )
 

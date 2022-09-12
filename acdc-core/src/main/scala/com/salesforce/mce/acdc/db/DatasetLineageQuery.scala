@@ -7,8 +7,9 @@
 
 package com.salesforce.mce.acdc.db
 
-import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext
+
+import slick.jdbc.PostgresProfile.api._
 
 object DatasetLineageQuery {
 
