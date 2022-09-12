@@ -15,8 +15,8 @@ import io.prometheus.client.hotspot.DefaultExports
 trait Metric {
   private lazy val config = new Configuration(ConfigFactory.load())
 
-  private val disableMetrics =
-    config.getOptional[String]("acdc.metrics.endpoint").getOrElse("").isEmpty
+  private val enableMetrics =
+    config.getOptional[Boolean]("acdc.metrics.enable").getOrElse(false)
 
   private val bypassPaths = config.getOptional[Seq[String]]("acdc.metrics.bypass.paths") match {
     case Some(paths) => paths.toSet
@@ -26,7 +26,7 @@ trait Metric {
   private val staticPathMarkers = Seq("instance", "dataset", "lineage", "__metrics", "__status")
 
   def parseRequest(request: RequestHeader): Option[(String, String)] = {
-    if (checkPathIsDisabled(request.path) || checkMetricIsDisabled)
+    if (checkPathIsDisabled(request.path) || !checkMetricIsEnabled)
       None
     else {
       val (staticPath, args) = request.path
@@ -42,7 +42,7 @@ trait Metric {
     }
   }
 
-  def checkMetricIsDisabled: Boolean = { disableMetrics }
+  def checkMetricIsEnabled: Boolean = { enableMetrics }
 
   def checkPathIsDisabled(path: String): Boolean = { bypassPaths.contains(path) }
 
