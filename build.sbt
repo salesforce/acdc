@@ -51,6 +51,10 @@ lazy val ws = (project in file("acdc-ws")).
       prometheusClient,
       prometheusCommon,
       prometheusHotSpot
+    ),
+    dependencyOverrides ++= Seq(
+      // fix https://nvd.nist.gov/vuln/detail/CVE-2020-36518
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.4"
     )
   ).
   dependsOn(core)
