@@ -1,4 +1,4 @@
-val slickVersion = "3.3.3"
+val slickVersion = "3.4.1"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
 val prometheusClient = "io.prometheus" % "simpleclient" % "0.16.0"
@@ -7,7 +7,6 @@ val prometheusHotSpot = "io.prometheus" % "simpleclient_hotspot" % "0.16.0"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
-  // fix https://nvd.nist.gov/vuln/detail/CVE-2022-36944
   scalaVersion := "2.13.9",
   libraryDependencies += scalaTestArtifact,
   fork := true,
@@ -36,7 +35,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.4.+"
+      "org.postgresql" % "postgresql" % "42.5.0"
     )
   )
 
