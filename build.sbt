@@ -7,7 +7,8 @@ val prometheusHotSpot = "io.prometheus" % "simpleclient_hotspot" % "0.16.0"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
-  scalaVersion := "2.13.8",
+  // fix https://nvd.nist.gov/vuln/detail/CVE-2022-36944
+  scalaVersion := "2.13.9",
   libraryDependencies += scalaTestArtifact,
   fork := true,
   organization := "com.salesforce.mce",
