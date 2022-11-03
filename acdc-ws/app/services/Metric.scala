@@ -70,7 +70,7 @@ class PrometheusMetric @Inject() (implicit ec: ExecutionContext) extends Metric 
   private val apiLatency: Summary = Summary
     .build()
     .name("apiLatencySummary")
-    .labelNames("path", "arguments", "method")
+    .labelNames("path", "method")
     .help("Profile API response time summary")
     .quantile(0.5d, 0.001d)
     .quantile(0.95d, 0.001d)
