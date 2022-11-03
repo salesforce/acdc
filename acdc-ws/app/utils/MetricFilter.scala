@@ -21,7 +21,8 @@ class MetricFilter @Inject() (
   )(requestHeader: RequestHeader): Future[Result] = {
     metric.parseRequest(requestHeader) match {
       case Some((staticPath, argument)) =>
-        val stopTimerCallback = metric.startApiTimer(staticPath, argument, requestHeader.method)
+        // hardcode argument to "" so as to control the number of time series
+        val stopTimerCallback = metric.startApiTimer(staticPath, "", requestHeader.method)
 
         nextFilter(requestHeader)
           .transform(
