@@ -21,14 +21,13 @@ class MetricFilter @Inject() (
     nextFilter: RequestHeader => Future[Result]
   )(requestHeader: RequestHeader): Future[Result] = {
     metric.parseRequest(requestHeader) match {
-      case Some((staticPath, argument)) =>
+      case Some((staticPath, _)) =>
         // simplify path to control prometheus summary metric label cardinality
         val simplePath = staticPath match {
           case patt(prefix) => prefix
           case _ => ""
         }
-        // hardcode argument to "" so as to control the number of time series
-        val stopTimerCallback = metric.startApiTimer(simplePath, "", requestHeader.method)
+        val stopTimerCallback = metric.startApiTimer(simplePath, requestHeader.method)
 
         nextFilter(requestHeader)
           .transform(
