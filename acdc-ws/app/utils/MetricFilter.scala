@@ -27,7 +27,6 @@ class MetricFilter @Inject() (
           case patt(prefix) => prefix
           case _ => ""
         }
-        // hardcode argument to "" so as to control the number of time series
         val stopTimerCallback = metric.startApiTimer(simplePath, requestHeader.method)
 
         nextFilter(requestHeader)
