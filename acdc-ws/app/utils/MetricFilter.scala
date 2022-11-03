@@ -16,13 +16,19 @@ class MetricFilter @Inject() (
   ec: ExecutionContext
 ) extends Filter {
 
+  private val patt = raw"(api-v1-[a-z]+).*".r // keep only first word after api-v1
   def apply(
     nextFilter: RequestHeader => Future[Result]
   )(requestHeader: RequestHeader): Future[Result] = {
     metric.parseRequest(requestHeader) match {
       case Some((staticPath, argument)) =>
+        // simplify path to control prometheus summary metric label cardinality
+        val simplePath = staticPath match {
+          case patt(prefix) => prefix
+          case _ => ""
+        }
         // hardcode argument to "" so as to control the number of time series
-        val stopTimerCallback = metric.startApiTimer(staticPath, "", requestHeader.method)
+        val stopTimerCallback = metric.startApiTimer(simplePath, "", requestHeader.method)
 
         nextFilter(requestHeader)
           .transform(
