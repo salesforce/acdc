@@ -14,13 +14,14 @@ import com.salesforce.mce.acdc.db.{
   DatasetLineageQuery,
   DatasetQuery
 }
-import services.DatabaseService
+import services.{DatabaseService, Metric}
 import utils.DbConfig
 
 class DataCountTask @Inject() (
   actorSystem: ActorSystem,
   dbService: DatabaseService,
-  dbConfig: DbConfig
+  dbConfig: DbConfig,
+  metric: Metric
 )(implicit
   ec: ExecutionContext
 ) extends Logging {
@@ -38,7 +39,9 @@ class DataCountTask @Inject() (
       logger.debug(s"Counted $datasetInstanceCount records from dataset_instance ...")
       logger.debug(s"Counted $datasetLineageCount records from dataset_lineage ...")
 
-      // TODO: log via extending kineticpulse PrometheusMetric for metrics scraping
+      metric.countDB("dataset", datasetCount.toDouble)
+      metric.countDB("dataset-instance", datasetInstanceCount.toDouble)
+      metric.countDB("dataset-lineage", datasetLineageCount.toDouble)
 
       refresh()
     }
