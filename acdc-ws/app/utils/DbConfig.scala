@@ -25,9 +25,10 @@ class DbConfig() extends Logging {
 
   def countTaskFrequencyMinute: Int = Try(config.getInt(s"count-task-frequency-minute")) match {
     case Success(d) => d
-    case _ =>
+    case Failure(e: ConfigException.Missing) =>
       logger.warn("No config found for count-task-frequency-minute, defaulting to 0.")
       0
+    case Failure(e) => throw e
   }
 
 }
