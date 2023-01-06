@@ -9,8 +9,6 @@ import com.google.inject.AbstractModule
 
 import com.salesforce.mce.kineticpulse.{Metric, PrometheusMetric}
 
-import services.{Metric, PrometheusMetric}
-import tasks.{AuthSettingReloadTask, DataInstExpirationTask}
 import tasks.{AuthSettingReloadTask, DataCountTask, DataInstExpirationTask}
 import utils.{Authorization, AuthorizationSettings}
 
