@@ -54,6 +54,8 @@ trait Metric {
 
   def clear(): Unit
 
+  def countDB(table: String, cnt: Double): Unit
+
 }
 
 @Singleton
@@ -76,6 +78,17 @@ class PrometheusMetric @Inject() (implicit ec: ExecutionContext) extends Metric 
     .quantile(0.95d, 0.001d)
     .quantile(0.99d, 0.001d)
     .register
+
+  private val dbCountGauge = Gauge
+    .build()
+    .name("acdc_db_record_count")
+    .labelNames("table")
+    .help("acdc DB table records count")
+    .register
+
+  override def countDB(table: String, cnt: Double): Unit = {
+    dbCountGauge.labels(table).set(cnt)
+  }
 
   override def incrementStatusCount(status: String): Unit = {
     httpStatusCount.labels(status).inc()

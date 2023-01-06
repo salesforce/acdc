@@ -8,7 +8,7 @@
 import com.google.inject.AbstractModule
 
 import services.{Metric, PrometheusMetric}
-import tasks.{AuthSettingReloadTask, DataInstExpirationTask}
+import tasks.{AuthSettingReloadTask, DataCountTask, DataInstExpirationTask}
 import utils.{Authorization, AuthorizationSettings}
 
 class Module extends AbstractModule {
@@ -22,6 +22,8 @@ class Module extends AbstractModule {
     bind(classOf[Metric]).to(classOf[PrometheusMetric])
     // Data forget task
     bind(classOf[DataInstExpirationTask]).asEagerSingleton()
+    // Data count task
+    bind(classOf[DataCountTask]).asEagerSingleton()
   }
 
 }

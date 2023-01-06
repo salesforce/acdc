@@ -35,6 +35,8 @@ object DatasetInstanceQuery {
 
   def forDataset(dataset: String) = DatasetInstanceTable().filter(_.dataset === dataset).result
 
+  def count() = DatasetInstanceTable().length.result
+
   def filter(
     dataset: Option[String],
     like: Option[String],
@@ -59,7 +61,8 @@ object DatasetInstanceQuery {
         (t, d) => t.filter(r => r.dataset === d)
       )
 
-    like.foldLeft(filteredByDataset)((t, l) => t.filter(r => r.name.like(l)))
+    like
+      .foldLeft(filteredByDataset)((t, l) => t.filter(r => r.name.like(l)))
       .sortBy(sortByColumn)
       .drop(offset)
       .take(limit)
