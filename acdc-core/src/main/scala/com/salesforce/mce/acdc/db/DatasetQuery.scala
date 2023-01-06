@@ -29,6 +29,8 @@ object DatasetQuery {
 
   def now() = LocalDateTime.now()
 
+  def count() = DatasetTable().length.result
+
   case class ForName(name: String) {
 
     def table = DatasetTable().filter(_.name === name)

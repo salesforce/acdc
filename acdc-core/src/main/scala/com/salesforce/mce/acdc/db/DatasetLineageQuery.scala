@@ -13,6 +13,8 @@ import slick.jdbc.PostgresProfile.api._
 
 object DatasetLineageQuery {
 
+  def count() = DatasetLineageTable().length.result
+
   case class ForDestination(dest: String) {
 
     def table = DatasetLineageTable().filter(_.toDataset === dest)
