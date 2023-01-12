@@ -14,14 +14,13 @@ import com.salesforce.mce.acdc.db.{
   DatasetLineageQuery,
   DatasetQuery
 }
-import services.{DatabaseService, Metric}
-import utils.DbConfig
+import services.DatabaseService
+import utils.{AcdcMetric, DbConfig}
 
 class DataCountTask @Inject() (
   actorSystem: ActorSystem,
   dbService: DatabaseService,
-  dbConfig: DbConfig,
-  metric: Metric
+  dbConfig: DbConfig
 )(implicit
   ec: ExecutionContext
 ) extends Logging {
@@ -39,9 +38,9 @@ class DataCountTask @Inject() (
       logger.debug(s"Counted $datasetInstanceCount records from dataset_instance ...")
       logger.debug(s"Counted $datasetLineageCount records from dataset_lineage ...")
 
-      metric.countDB("dataset", datasetCount.toDouble)
-      metric.countDB("dataset-instance", datasetInstanceCount.toDouble)
-      metric.countDB("dataset-lineage", datasetLineageCount.toDouble)
+      AcdcMetric.countDB("dataset", datasetCount.toDouble)
+      AcdcMetric.countDB("dataset-instance", datasetInstanceCount.toDouble)
+      AcdcMetric.countDB("dataset-lineage", datasetLineageCount.toDouble)
 
       refresh()
     }
