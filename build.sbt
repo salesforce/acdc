@@ -5,7 +5,7 @@ val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.2.+"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
-  scalaVersion := "2.13.9",
+  scalaVersion := "2.13.10",
   libraryDependencies += scalaTestArtifact,
   fork := true,
   organization := "com.salesforce.mce",
@@ -33,7 +33,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.5.4"
+      "org.postgresql" % "postgresql" % "42.6.0"
     )
   )
 
@@ -49,9 +49,9 @@ lazy val ws = (project in file("acdc-ws")).
       kineticpulse
     ),
     dependencyOverrides ++= Seq(
-      // fix https://nvd.nist.gov/vuln/detail/CVE-2022-42003
-      "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.4.1",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.4"
+      // the transitive jackson dependencies from play framework on has security vulnerabilities
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.2",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.2"
     )
   ).
   dependsOn(core)
