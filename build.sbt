@@ -1,7 +1,7 @@
 val slickVersion = "3.4.1"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
-val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.2.+"
+val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.2.3"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
