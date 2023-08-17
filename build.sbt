@@ -49,7 +49,6 @@ lazy val ws = (project in file("acdc-ws")).
       kineticpulse
     ),
     dependencyOverrides ++= Seq(
-      "com.google.guava" % "guava" % "32.1.1-jre",
       // the transitive jackson dependencies from play framework on has security vulnerabilities
       "com.fasterxml.jackson.core" % "jackson-databind" % "2.15.1",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.15.1"
