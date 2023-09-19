@@ -7,13 +7,13 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class CreateDatasetRequest(name: String, meta: Option[String])
 
 object CreateDatasetRequest {
 
-  implicit val reads = Json.reads[CreateDatasetRequest]
-  implicit val writes = Json.writes[CreateDatasetRequest]
+  implicit val reads: Reads[CreateDatasetRequest] = Json.reads
+  implicit val writes: Writes[CreateDatasetRequest] = Json.writes
 
 }
