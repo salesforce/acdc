@@ -9,7 +9,7 @@ package models
 
 import java.time.LocalDateTime
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class DatasetResponse(
   name: String,
@@ -20,7 +20,7 @@ case class DatasetResponse(
 
 object DatasetResponse {
 
-  implicit val reads = Json.reads[DatasetResponse]
-  implicit val writes = Json.writes[DatasetResponse]
+  implicit val reads: Reads[DatasetResponse] = Json.reads
+  implicit val writes: Writes[DatasetResponse] = Json.writes
 
 }

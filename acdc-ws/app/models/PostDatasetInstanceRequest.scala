@@ -7,7 +7,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class PostDatasetInstanceRequest(
   dataset: String,
@@ -18,7 +18,7 @@ case class PostDatasetInstanceRequest(
 
 object PostDatasetInstanceRequest {
 
-  implicit val reads = Json.reads[PostDatasetInstanceRequest]
-  implicit val writes = Json.writes[PostDatasetInstanceRequest]
+  implicit val reads: Reads[PostDatasetInstanceRequest] = Json.reads
+  implicit val writes: Writes[PostDatasetInstanceRequest] = Json.writes
 
 }
