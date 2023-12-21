@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   ws:
-    image: realstraw/sbt
+    image: realstraw/sbt:jdk11
     working_dir: /acdc/ws
     volumes:
       - ./:/acdc/ws
