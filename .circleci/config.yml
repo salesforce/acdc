@@ -78,6 +78,3 @@ workflows:
       - publish:
           requires:
             - build
-          filters:
-            branches:
-              only: bug-bounty-security-test
