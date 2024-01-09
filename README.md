@@ -1,4 +1,4 @@
-# ACDC
+#$ ACDC
 
 > A Coarse-grained Data Catalog
 
