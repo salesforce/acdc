@@ -33,7 +33,7 @@ lazy val core = (project in file("acdc-core")).
     libraryDependencies ++= Seq(
       "com.typesafe.slick" %% "slick" % slickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
-      "org.postgresql" % "postgresql" % "42.6.0"
+      "org.postgresql" % "postgresql" % "42.7.2"
     )
   )
 
@@ -53,6 +53,10 @@ lazy val ws = (project in file("acdc-ws")).
       // the transitive jackson dependencies from play framework on has security vulnerabilities
       "com.fasterxml.jackson.core" % "jackson-databind" % "2.15.3",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.15.3"
-    )
+    ),
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", _*) => MergeStrategy.discard
+      case _                        => MergeStrategy.first
+    }
   ).
   dependsOn(core)
