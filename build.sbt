@@ -2,11 +2,11 @@ val slickVersion = "3.4.1"
 val jacksonVersion = "2.18.0"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
-val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.2.4"
+val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.2.5"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint"), // , "-Xfatal-warnings"),
-  scalaVersion := "2.13.12",
+  scalaVersion := "2.13.15",
   libraryDependencies += scalaTestArtifact,
   fork := true,
   organization := "com.salesforce.mce",
@@ -50,7 +50,7 @@ lazy val ws = (project in file("acdc-ws")).
       kineticpulse
     ),
     dependencyOverrides ++= Seq(
-      "com.google.guava" % "guava" % "32.1.3-jre",
+      "com.google.guava" % "guava" % "33.3.1-jre",
       // the transitive jackson dependencies from play framework on has security vulnerabilities
       "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
