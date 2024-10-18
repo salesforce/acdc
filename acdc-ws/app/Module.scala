@@ -6,13 +6,14 @@
  */
 
 import com.google.inject.AbstractModule
+import play.api.libs.concurrent.PekkoGuiceSupport
 
 import com.salesforce.mce.kineticpulse.{Metric, PrometheusMetric}
-
 import tasks.{AuthSettingReloadTask, DataCountTask, DataInstExpirationTask}
+
 import utils.{Authorization, AuthorizationSettings}
 
-class Module extends AbstractModule {
+class Module extends AbstractModule with PekkoGuiceSupport {
 
   override def configure() = {
     // Pass in custom implementation with configs for Authorization
