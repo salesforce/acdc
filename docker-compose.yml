@@ -12,8 +12,8 @@ services:
     ports:
       - 9001:9000
     tty: true # for easy debugging
-    # command:
-    #   sbt ws/run
+    command:
+      sbt ws/run
   db:
     image: postgres
     volumes:

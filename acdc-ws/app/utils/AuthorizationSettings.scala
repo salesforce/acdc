@@ -25,8 +25,7 @@ class AuthorizationSettings private (config: Config) {
 
   def xfccKeyAuthEnabled: Boolean = config.getBoolean("xfcc.enabled")
 
-  def xfccShouldContain: List[String] =
-    config.getStringList("xfcc.must-contain").toArray.toList.map(_.toString)
+  def xfccMustContain: String = config.getString("xfcc.must-contain")
 
   def keyRoles: Map[String, List[String]] = {
     val userRoles = for {

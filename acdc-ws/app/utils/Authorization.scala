@@ -24,21 +24,21 @@ class Authorization(private var authorizationSettings: AuthorizationSettings) {
     (authorizationSettings.apiKeyAuthEnabled, authorizationSettings.xfccKeyAuthEnabled) match {
       case (true, true) =>
         if (getKeyRoles(request.headers.get(authorizationSettings.apiKeyAuthHeader)) ==
-          getSpiffe(request.headers.get(authorizationSettings.xfccAuthHeader))) {
+          getXfccRoles(request.headers.get(authorizationSettings.xfccAuthHeader))) {
           List(Admin)
         } else {
           List.empty
         }
       case (true, false) => getKeyRoles(request.headers.get(authorizationSettings.apiKeyAuthHeader))
-      case (false, true) => getSpiffe(request.headers.get(authorizationSettings.xfccAuthHeader))
+      case (false, true) => getXfccRoles(request.headers.get(authorizationSettings.xfccAuthHeader))
       case (false, false) => List(Admin)
     }
   }
 
-  private def getSpiffe(key: Option[String]) = {
+  private def getXfccRoles(key: Option[String]) = {
     key match {
       case Some(xfcc) =>
-        if (authorizationSettings.xfccShouldContain.forall(xfcc.contains)) { List(Admin) }
+        if (xfcc.contains(authorizationSettings.xfccMustContain)) { List(Admin) }
         else { List.empty }
       case None => List.empty
     }
