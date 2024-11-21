@@ -17,9 +17,9 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigList}
 
 class AuthorizationSettings private (config: Config) {
 
-  def apiKeyAuthHeader: String = config.getString(s"apikey.header-name")
+  def apiKeyAuthHeader: String = config.getString(s"header-name")
 
-  def apiKeyAuthEnabled: Boolean = config.getBoolean("apikey.enabled")
+  def apiKeyAuthEnabled: Boolean = config.getBoolean("enabled")
 
   def xfccAuthHeader: String = config.getString("xfcc.header-name")
 
@@ -29,7 +29,7 @@ class AuthorizationSettings private (config: Config) {
 
   def keyRoles: Map[String, List[String]] = {
     val userRoles = for {
-      (r, us) <- config.getConfig("apikey.hashed-keys").root().asScala.toList
+      (r, us) <- config.getConfig("hashed-keys").root().asScala.toList
       u <- us.asInstanceOf[ConfigList].unwrapped().asScala
     } yield u.toString() -> r
 
