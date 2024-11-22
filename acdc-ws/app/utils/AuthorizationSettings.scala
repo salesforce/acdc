@@ -17,9 +17,15 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigList}
 
 class AuthorizationSettings private (config: Config) {
 
-  def authHeader: String = config.getString(s"header-name")
+  def apiKeyAuthHeader: String = config.getString(s"header-name")
 
-  def authEnabled: Boolean = config.getBoolean(s"enabled")
+  def apiKeyAuthEnabled: Boolean = config.getBoolean("enabled")
+
+  def xfccAuthHeader: String = config.getString("xfcc.header-name")
+
+  def xfccKeyAuthEnabled: Boolean = config.getBoolean("xfcc.enabled")
+
+  def xfccMustContain: String = config.getString("xfcc.must-contain")
 
   def keyRoles: Map[String, List[String]] = {
     val userRoles = for {
