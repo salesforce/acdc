@@ -22,17 +22,7 @@ class Authorization(private var authorizationSettings: AuthorizationSettings) {
 
   def getRoles(request: Request[_]): List[String] = {
     (authorizationSettings.apiKeyAuthEnabled, authorizationSettings.xfccKeyAuthEnabled) match {
-      case (true, true) =>
-        if (!getKeyRoles(request.headers.get(authorizationSettings.apiKeyAuthHeader)).isEmpty) {
-          if (!getXfccRoles(request.headers.get(authorizationSettings.xfccAuthHeader)).isEmpty) {
-            List(Admin)
-          } else {
-            List.empty
-          }
-        } else {
-          List.empty
-        }
-      case (true, false) => getKeyRoles(request.headers.get(authorizationSettings.apiKeyAuthHeader))
+      case (true, _) => getKeyRoles(request.headers.get(authorizationSettings.apiKeyAuthHeader))
       case (false, true) => getXfccRoles(request.headers.get(authorizationSettings.xfccAuthHeader))
       case (false, false) => List(Admin)
     }
