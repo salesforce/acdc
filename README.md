@@ -19,7 +19,7 @@ Set postgres password by
 export POSTGRES_PASSWORD=<my db password>
 ```
 
-If config ```acdc.auth.enabled = true``` is enabled, authorization api-keys are SHA-256 hashed.  The REST enb-points should include a http header key ```x-api-key``` with appropriate value.
+If config ```acdc.auth.enabled = true``` is enabled, authorization api-keys are SHA-256 hashed.  The REST endpoints should include a http header key ```x-api-key``` with appropriate value.
 
 Set an environment variable for the authorized x-api-key hashed string.  Example:
 
