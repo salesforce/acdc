@@ -5,6 +5,7 @@ target
 
 # IntelleJ
 .idea
+.bsp
 
 # Docker compose envs
 .env
