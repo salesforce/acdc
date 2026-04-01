@@ -1,5 +1,5 @@
 val slickVersion = "3.4.1"
-val jacksonVersion = "2.21.0"
+val jacksonVersion = "2.21.1"
 
 val scalaTestArtifact = "org.scalatest" %% "scalatest" % "3.2.+" % Test
 val kineticpulse = "com.salesforce.mce" %% "kineticpulse-metric" % "0.3.3"
